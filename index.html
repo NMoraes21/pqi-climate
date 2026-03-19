@@ -287,6 +287,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div style="padding:0 0 8px;">
 
     <!-- Gerar PDF (pré-requisito) -->
+    <!-- Instruções -->
+    <div class="card" style="margin-bottom:12px;border-left:4px solid var(--navy);">
+      <div class="card-title">Como proceder</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--text);">
+        <div>1. Clique em <strong>"Finalizar e Sincronizar"</strong> para gerar o PDF e salvar os dados</div>
+        <div>2. Para enviar o relatório pelo WhatsApp, encaminhe para:</div>
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin:6px 0 0 16px;">+55 11 99922-5270</div>
+      </div>
+    </div>
+
     <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarSincronizarCompartilhar()" style="background:#0E2750;font-size:16px;padding:15px;">📋 Finalizar e Sincronizar</button>
 
     <div id="envio-feedback" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.6;"></div>
@@ -413,7 +423,6 @@ function renderDashboard(){
     h+='</div></div>';
     h+='<div class="insp-actions">';
     if(isPend){
-      h+='<button class="insp-btn" style="color:#25D366" onclick="resendWA(\''+r.id+'\')">💬 WA</button>';
       h+='<button class="insp-btn" style="color:var(--mod)" onclick="resendEmail(\''+r.id+'\')">📧 E-mail</button>';
     }
     h+='<button class="insp-btn" style="color:var(--mod)" onclick="verRelatorio(\''+r.id+'\')">📋 Ver</button>';
@@ -427,6 +436,12 @@ function renderDashboard(){
 function verRelatorio(id){
   var rec=getHistory().find(function(r){return r.id===id;});
   if(!rec)return;
+  // Se for a inspeção atual na sessão, mostra o relatório visual completo
+  if(window._currentInspId===id||_currentInspId===id){
+    goTo(8);
+    return;
+  }
+  // Caso contrário abre o corpo texto em nova aba
   var w=window.open('','_blank');
   w.document.write('<html><head><meta charset="UTF-8"><title>'+rec.torre+'</title><style>body{font-family:sans-serif;padding:20px;max-width:700px;margin:0 auto;font-size:13px;line-height:1.6;white-space:pre-wrap;}</style></head><body>'+rec.corpo+'</body></html>');
   w.document.close();
@@ -777,9 +792,6 @@ async function _gerarPDFCore(){
   _pdfGenerated=true;
   if(_currentInspId)markSent(_currentInspId);
   _sendDone=true;
-  if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
-    setTimeout(function(){alert('\u{1F4C1} SALVAR O PDF — iPhone:\n\n1. O PDF abriu em aba do Safari\n2. Toque no ícone Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n4. Salve em "No meu iPhone / Downloads"\n\nVocê vai precisar do arquivo para anexar no WhatsApp.');},1400);
-  }
   setProgress(100,'Pronto!');
   await new Promise(function(r){setTimeout(r,600);});
   hideProgress();
@@ -829,14 +841,11 @@ async function gerarSincronizarCompartilhar(){
 
     // 2. Popup salvar PDF
     var isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
-    var isAndroid=/Android/i.test(navigator.userAgent);
     var msg='';
     if(isIOS){
-      msg='📱 SALVAR O PDF — iPhone/iPad:\n\n1. O PDF abriu no Safari\n2. Toque em Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n4. Salve em "No meu iPhone / Downloads"\n\nClique OK para sincronizar com o SharePoint.';
-    }else if(isAndroid){
-      msg='📱 PDF salvo automaticamente em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
+      msg='📁 Para manter um registro:\n\n1. O PDF abriu no Safari\n2. Toque em Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n\nClique OK para sincronizar com o SharePoint.';
     }else{
-      msg='💻 PDF salvo em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
+      msg='📁 Para manter um registro:\n\nO PDF foi salvo em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
     }
     if(!confirm(msg)){
       btn.disabled=false;btn.textContent='📋 Finalizar e Sincronizar';btn.style.background='#0E2750';
@@ -1049,56 +1058,6 @@ function montarPayloadChecklist(score, inspID){
     });
   });
   return rows;
-}
-
-// ── SINCRONIZAR COM SHAREPOINT ────────────────────────────────
-async function sincronizarSharePoint(){
-  var btn=document.getElementById('btn-sincronizar');
-  if(!_pdfGenerated){alert('Gere o PDF primeiro antes de sincronizar.');return;}
-
-  // Popup instruções de salvar PDF
-  var isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
-  var isAndroid=/Android/i.test(navigator.userAgent);
-  var msg='';
-  if(isIOS){
-    msg='📱 SALVAR O PDF — iPhone/iPad:\n\n1. O PDF foi salvo na aba do Safari\n2. Toque no ícone Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n4. Salve em "No meu iPhone / Downloads"\n\nDepois clique OK para sincronizar com o SharePoint.';
-  }else if(isAndroid){
-    msg='📱 SALVAR O PDF — Android:\n\nO PDF foi salvo automaticamente na pasta Downloads do seu celular.\n\nClique OK para sincronizar com o SharePoint.';
-  }else{
-    msg='💻 O PDF foi salvo na pasta Downloads do computador.\n\nClique OK para sincronizar com o SharePoint.';
-  }
-  if(!confirm(msg))return;
-
-  if(!navigator.onLine){showEnvioFeedback('⚠️ Sem conexão. Tente novamente quando tiver sinal.',false);return;}
-  btn.disabled=true;btn.textContent='⏳ Sincronizando...';
-  var score=calcScore();
-  var inspID=gerarInspectionID();
-  _currentInspId=inspID;
-  var erros=[];
-
-  // Lista 1 — Inspeção
-  try{
-    var p1=montarPayloadInspecao(score,inspID);
-    var r1=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p1)});
-    if(!r1.ok&&r1.status!==202)throw new Error('Lista 1: status '+r1.status);
-  }catch(e){erros.push(e.message);}
-
-  // Lista 2 — Checklist (só se webhook configurado)
-  if(WEBHOOK_CHECKLIST_URL){
-    try{
-      var rows=montarPayloadChecklist(score,inspID);
-      var r2=await fetch(WEBHOOK_CHECKLIST_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'hrz2026pqi',inspection_id:inspID,rows:rows})});
-      if(!r2.ok&&r2.status!==202)throw new Error('Lista 2: status '+r2.status);
-    }catch(e){erros.push(e.message);}
-  }
-
-  if(erros.length===0){
-    btn.textContent='✓ Sincronizado';btn.style.background='#2e7d32';
-    showEnvioFeedback('✅ Inspeção sincronizada! ID: '+inspID,true);
-  }else{
-    btn.disabled=false;btn.textContent='☁️ Sincronizar com SharePoint';
-    showEnvioFeedback('❌ Erro: '+erros.join(' | '),false);
-  }
 }
 
 // Init
