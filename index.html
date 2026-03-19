@@ -776,7 +776,19 @@ async function _gerarPDFCore(){
   var element=document.getElementById('rpt-content');
   setProgress(15,'Capturando relatório...');
   await new Promise(function(r){setTimeout(r,100);});
-  var canvas=await html2canvas(element,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+
+  // Força largura A4 (794px @ 96dpi) independente do dispositivo
+  var originalWidth=element.style.width;
+  element.style.width='794px';
+  element.style.maxWidth='794px';
+  await new Promise(function(r){setTimeout(r,80);});
+
+  var canvas=await html2canvas(element,{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794});
+
+  // Restaura largura original
+  element.style.width=originalWidth;
+  element.style.maxWidth='';
+
   setProgress(60,'Montando páginas...');
   var imgData=canvas.toDataURL('image/jpeg',.85);
   var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
