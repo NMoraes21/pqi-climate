@@ -423,7 +423,10 @@ function renderDashboard(){
     h+='</div></div>';
     h+='<div class="insp-actions">';
     if(isPend){
+      h+='<button class="insp-btn" style="color:#0078d4;font-weight:700;" onclick="sincronizarHist(\''+r.id+'\')">☁️ Sync</button>';
       h+='<button class="insp-btn" style="color:var(--mod)" onclick="resendEmail(\''+r.id+'\')">📧 E-mail</button>';
+    }else{
+      h+='<button class="insp-btn" style="color:#9ca3af;" disabled>✓ Sync</button>';
     }
     h+='<button class="insp-btn" style="color:var(--mod)" onclick="verRelatorio(\''+r.id+'\')">📋 Ver</button>';
     h+='<button class="insp-btn" style="color:var(--navy)" onclick="baixarPDFhist(\''+r.id+'\')">⬇ PDF</button>';
@@ -1058,6 +1061,37 @@ function montarPayloadChecklist(score, inspID){
     });
   });
   return rows;
+}
+
+async function sincronizarHist(id){
+  var rec=getHistory().find(function(r){return r.id===id;});
+  if(!rec)return;
+  if(!navigator.onLine){alert('Sem conexão. Tente novamente quando tiver sinal.');return;}
+  var score={pctGeral:rec.indice/100,pcts:{M1:0,M2:0,M3:0,M4:0,M5:0},criticos:[],totais:{},maxEfetivo:{}};
+  var payload={
+    token:'hrz2026pqi',
+    id:rec.id,
+    title:(rec.concessao||'')+'_'+(rec.linha||'')+'_'+rec.torre+'_'+rec.data,
+    torre:rec.torre,
+    concessao:rec.concessao||'',
+    linha:rec.linha||'',
+    data_inspecao:rec.data,
+    inspetor1:rec.insp1||'',
+    indice_geral:rec.indice,
+    classificacao:rec.classificacao||'',
+    versao_app:'V11'
+  };
+  try{
+    var r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok||r.status===202){
+      markSent(id);
+      renderDashboard();
+    }else{
+      alert('Erro ao sincronizar: status '+r.status);
+    }
+  }catch(e){
+    alert('Erro ao sincronizar: '+e.message);
+  }
 }
 
 // Init
