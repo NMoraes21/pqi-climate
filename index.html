@@ -287,14 +287,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div style="padding:0 0 8px;">
 
     <!-- Gerar PDF (pré-requisito) -->
-    <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarPDFBase()" style="background:#0E2750;font-size:16px;padding:15px;">📄 Gerar PDF</button>
+    <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarSincronizarCompartilhar()" style="background:#0E2750;font-size:16px;padding:15px;">📋 Finalizar e Sincronizar</button>
 
     <div id="envio-feedback" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.6;"></div>
 
     <!-- Ações pós-PDF (inicialmente ocultas) -->
     <div id="acoes-pos-pdf" style="display:none;margin-top:12px;">
       <button class="btn-primary" id="btn-compartilhar" onclick="compartilharPDF()" style="background:#25D366;font-size:15px;padding:13px;">📤 Compartilhar PDF</button>
-      <button class="btn-primary" id="btn-sincronizar" onclick="sincronizarSharePoint()" style="background:#0078d4;font-size:15px;padding:13px;margin-top:8px;">☁️ Sincronizar com SharePoint</button>
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
         <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Backup por e-mail</div>
         <div class="field" style="margin-bottom:8px;"><label>E-mails extras (opcional) — separe por ;</label><input type="text" id="email_cc" placeholder="fulano@empresa.com; ciclano@empresa.com"></div>
@@ -818,6 +817,72 @@ async function gerarPDFBase(){
   }
 }
 
+// ── BOTÃO ÚNICO: Gerar PDF + Sincronizar + Compartilhar ───────
+async function gerarSincronizarCompartilhar(){
+  var btn=document.getElementById('btn-gerar-pdf');
+  btn.disabled=true;btn.textContent='⏳ Gerando PDF...';
+  showProgress('Gerando PDF');
+  try{
+    // 1. Gera PDF
+    var nome=await _gerarPDFCore();
+    btn.textContent='⏳ Sincronizando...';
+
+    // 2. Popup salvar PDF
+    var isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+    var isAndroid=/Android/i.test(navigator.userAgent);
+    var msg='';
+    if(isIOS){
+      msg='📱 SALVAR O PDF — iPhone/iPad:\n\n1. O PDF abriu no Safari\n2. Toque em Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n4. Salve em "No meu iPhone / Downloads"\n\nClique OK para sincronizar com o SharePoint.';
+    }else if(isAndroid){
+      msg='📱 PDF salvo automaticamente em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
+    }else{
+      msg='💻 PDF salvo em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
+    }
+    if(!confirm(msg)){
+      btn.disabled=false;btn.textContent='📋 Finalizar e Sincronizar';btn.style.background='#0E2750';
+      return;
+    }
+
+    // 3. Sincroniza com SharePoint
+    if(!navigator.onLine){
+      showEnvioFeedback('⚠️ Sem conexão. PDF salvo. Tente novamente quando tiver sinal.',false);
+      btn.disabled=false;btn.textContent='📋 Finalizar e Sincronizar';btn.style.background='#0E2750';
+      document.getElementById('acoes-pos-pdf').style.display='block';
+      return;
+    }
+    var score=calcScore();
+    var inspID=gerarInspectionID();
+    _currentInspId=inspID;
+    var erros=[];
+    try{
+      var p1=montarPayloadInspecao(score,inspID);
+      var r1=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p1)});
+      if(!r1.ok&&r1.status!==202)throw new Error('status '+r1.status);
+    }catch(e){erros.push(e.message);}
+    if(WEBHOOK_CHECKLIST_URL){
+      try{
+        var rows=montarPayloadChecklist(score,inspID);
+        var r2=await fetch(WEBHOOK_CHECKLIST_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'hrz2026pqi',inspection_id:inspID,rows:rows})});
+        if(!r2.ok&&r2.status!==202)throw new Error('status '+r2.status);
+      }catch(e){erros.push(e.message);}
+    }
+
+    // 4. Resultado
+    if(erros.length===0){
+      btn.textContent='✓ Concluído';btn.style.background='#2e7d32';btn.disabled=false;
+      document.getElementById('acoes-pos-pdf').style.display='block';
+      showEnvioFeedback('✅ PDF salvo e dados sincronizados! ID: '+inspID+'\n\nAgora compartilhe o PDF pelo botão abaixo.',true);
+    }else{
+      btn.textContent='⚠️ PDF salvo — erro ao sincronizar';btn.style.background='#e65100';btn.disabled=false;
+      document.getElementById('acoes-pos-pdf').style.display='block';
+      showEnvioFeedback('⚠️ PDF gerado mas erro ao sincronizar: '+erros.join(' | ')+'\nTente novamente mais tarde.',false);
+    }
+  }catch(e){
+    hideProgress();btn.textContent='📋 Finalizar e Sincronizar';btn.disabled=false;btn.style.background='#0E2750';
+    alert('Erro: '+e.message);
+  }
+}
+
 async function compartilharPDF(){
   if(!window._pdfBase64){alert('Gere o PDF primeiro.');return;}
   var nome=window._pdfName||'relatorio.pdf';
@@ -869,9 +934,11 @@ function concluirInspecao(){goTo('home');}
 
 // ── GERAR INSPECTION ID LEGÍVEL ───────────────────────────────
 function gerarInspectionID(){
-  var torre=(document.getElementById('id_torre').value||'X').replace(/[^a-zA-Z0-9]/g,'-');
+  var torre=(document.getElementById('id_torre').value||'X').replace(/[^a-zA-Z0-9]/g,'-').toUpperCase();
+  var concessao=(document.getElementById('concessao').value||'X').replace(/[^a-zA-Z0-9]/g,'');
+  var linha=(document.getElementById('linha').value||'X').replace(/[^a-zA-Z0-9]/g,'');
   var data=(document.getElementById('data_inspecao').value||new Date().toISOString().split('T')[0]).replace(/-/g,'');
-  return 'INSP-'+data+'-'+torre.toUpperCase();
+  return 'PQI_'+concessao+'_'+linha+'_'+torre+'_'+data;
 }
 
 // ── MONTAR PAYLOAD LISTA 1 ────────────────────────────────────
@@ -885,7 +952,7 @@ function montarPayloadInspecao(score, inspID){
   return {
     token:'hrz2026pqi',
     id:inspID,
-    title:torre+' | '+data,
+    title:(document.getElementById('concessao').value||'')+'_'+(document.getElementById('linha').value||'')+'_'+torre+'_'+data,
     torre:torre,
     circuito:document.getElementById('circuito').value||'',
     concessao:document.getElementById('concessao').value||'',
