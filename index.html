@@ -556,7 +556,26 @@ function fotoSlotsHtml(id,field){
   }
   return h+'</div>';
 }
-function capFoto(id,field,idx,input){var file=input.files[0];if(!file)return;var r=new FileReader();r.onload=function(e){if(!estado[id][field])estado[id][field]=['','',''];estado[id][field][idx]=e.target.result;renderItems(_itemSec[id]);};r.readAsDataURL(file);}
+function capFoto(id,field,idx,input){
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var maxW=800,maxH=800,w=img.width,h=img.height;
+      if(w>maxW||h>maxH){var ratio=Math.min(maxW/w,maxH/h);w=Math.round(w*ratio);h=Math.round(h*ratio);}
+      var canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var compressed=canvas.toDataURL('image/jpeg',0.70);
+      if(!estado[id][field])estado[id][field]=['','',''];
+      estado[id][field][idx]=compressed;
+      renderItems(_itemSec[id]);
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
 function remFoto(id,field,idx){if(!estado[id][field])return;estado[id][field][idx]='';renderItems(_itemSec[id]);}
 
 // ── RENDER ITEMS ──────────────────────────────────────────────
@@ -1067,7 +1086,9 @@ function montarPayloadChecklist(score, inspID){
         prazo:pl.prazoData||'',
         prazo_maximo:prazoMax(item.risco),
         fora_do_prazo:prazoFora,
-        status_acao:gerou==='Sim'?'Aberto':''
+        status_acao:gerou==='Sim'?'Aberto':'',
+        fotos_evidencia:(est.fotos||[]).filter(function(f){return f;}).map(function(f){return f.split(',')[1]||'';}),
+        fotos_depois:(est.fotosDepois||[]).filter(function(f){return f;}).map(function(f){return f.split(',')[1]||'';})
       });
     });
   });
