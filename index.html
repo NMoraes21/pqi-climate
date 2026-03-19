@@ -461,7 +461,7 @@ function baixarPDFhist(id){
     a.click();
     document.body.removeChild(a);
   }else{
-    alert('O PDF só pode ser baixado novamente na mesma sessão em que foi gerado.\n\nPara gerar novamente, abra o relatório, clique em "Ver Resultado" e depois "Gerar PDF".');
+    alert('O PDF só pode ser baixado novamente na mesma sessão em que foi gerado.\n\nPara gerar novamente, abra o relatório e clique em "Finalizar e Sincronizar".');
   }
 }
 
@@ -533,7 +533,7 @@ function iniciarNovaInspecao(){
   ['obs_gerais','hora_fim','assina_nome','assina_conf'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   var fb=document.getElementById('envio-feedback');if(fb)fb.style.display='none';
   var ap=document.getElementById('acoes-pos-pdf');if(ap)ap.style.display='none';
-  var bg=document.getElementById('btn-gerar-pdf');if(bg){bg.textContent='📄 Gerar PDF';bg.style.background='#0E2750';bg.disabled=false;}
+  var bg=document.getElementById('btn-gerar-pdf');if(bg){bg.textContent='📋 Finalizar e Sincronizar';bg.style.background='#0E2750';bg.disabled=false;}
   document.getElementById('data_inspecao').valueAsDate=new Date();
   var now=new Date();
   document.getElementById('hora_inicio').value=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
@@ -805,8 +805,7 @@ async function _gerarPDFCore(){
   window._pdfName=nome;
   saveInspection();
   _pdfGenerated=true;
-  if(_currentInspId)markSent(_currentInspId);
-  _sendDone=true;
+  _sendDone=false;
   setProgress(100,'Pronto!');
   await new Promise(function(r){setTimeout(r,600);});
   hideProgress();
@@ -839,7 +838,7 @@ async function gerarPDFBase(){
     document.getElementById('acoes-pos-pdf').style.display='block';
     showEnvioFeedback('✅ PDF salvo: "'+nome+'"',true);
   }catch(e){
-    hideProgress();btn.textContent='📄 Gerar PDF';btn.disabled=false;btn.style.background='#0E2750';
+    hideProgress();btn.textContent='📋 Finalizar e Sincronizar';btn.disabled=false;btn.style.background='#0E2750';
     alert('Erro: '+e.message);
   }
 }
