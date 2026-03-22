@@ -1,229 +1,411 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head>
+<html lang="pt-BR">
+<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#0E2750">
-<title>Auditoria Climática — HRZ Transmissoras</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A1F44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ATLAS">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>ATLAS — HRZ Transmissoras</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
-:root{--navy:#0E2750;--navy-light:#1a3a6b;--bg:#f4f6fb;--white:#fff;--border:#e0e4ed;--text:#1a1a2e;--muted:#6b7280;--sim:#e65100;--nao:#2e7d32;--crit:#b71c1c;--mod:#1565c0;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
-.header{background:var(--navy);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:100;}
+/* ══════════════════════════════════════════
+   ATLAS — Design System
+   HRZ Transmissoras
+══════════════════════════════════════════ */
+:root {
+  --navy:       #0A1F44;
+  --navy-light: #152E5E;
+  --navy-mid:   #1E3E72;
+  --accent:     #3B82F6;
+  --accent-glow:#60A5FA;
+  --green:      #10B981;
+  --green-bg:   #ECFDF5;
+  --orange:     #F59E0B;
+  --orange-bg:  #FFFBEB;
+  --red:        #EF4444;
+  --red-bg:     #FEF2F2;
+  --blue:       #3B82F6;
+  --blue-bg:    #EFF6FF;
+  --bg:         #F0F4FA;
+  --white:      #FFFFFF;
+  --border:     #E2E8F0;
+  --text:       #0F172A;
+  --muted:      #64748B;
+  --sim:        #F59E0B;
+  --nao:        #10B981;
+  --crit:       #DC2626;
+  --mod:        #2563EB;
+  --shadow:     0 1px 3px rgba(10,31,68,.10), 0 1px 2px rgba(10,31,68,.06);
+  --shadow-md:  0 4px 6px rgba(10,31,68,.10), 0 2px 4px rgba(10,31,68,.06);
+  --shadow-lg:  0 10px 15px rgba(10,31,68,.10), 0 4px 6px rgba(10,31,68,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100dvh;}
+
+/* ── HEADER ── */
+.header{background:var(--navy);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.25);}
 .header-top{display:flex;justify-content:space-between;align-items:center;}
-.header-title{font-size:15px;font-weight:700;}
-.header-sub{font-size:11px;opacity:.65;margin-top:1px;}
-.progress-bar{height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:8px;}
-.progress-fill{height:100%;background:#4fc3f7;border-radius:2px;transition:width .4s;}
-.section{display:none;padding:16px;}
+.header-brand{display:flex;align-items:center;gap:10px;}
+.header-logo{width:32px;height:32px;background:rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;letter-spacing:-1px;color:#fff;}
+.header-title{font-size:15px;font-weight:700;letter-spacing:.3px;}
+.header-sub{font-size:11px;opacity:.55;margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.header-btn{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.header-btn:active{background:rgba(255,255,255,.2);}
+.header-step{font-size:11px;opacity:.5;}
+.progress-bar{height:2px;background:rgba(255,255,255,.15);margin-top:8px;}
+.progress-fill{height:100%;background:var(--accent-glow);transition:width .4s cubic-bezier(.4,0,.2,1);}
+
+/* ── SYNC BANNER ── */
+.sync-banner{display:none;background:#1E3A5F;border-bottom:1px solid rgba(59,130,246,.3);padding:8px 16px;font-size:12px;font-weight:600;color:#93C5FD;align-items:center;gap:8px;}
+.sync-banner.show{display:flex;}
+.sync-banner.syncing{background:#1E3A5F;color:#60A5FA;}
+.sync-banner.success{background:#064E3B;color:#6EE7B7;border-color:rgba(16,185,129,.3);}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#3B82F6;flex-shrink:0;}
+.sync-dot.pulse{animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.sync-banner-btn{margin-left:auto;background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;}
+
+/* ── SEÇÕES ── */
+.section{display:none;padding:16px 16px 80px;}
 .section.active{display:block;}
-.card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px 16px;margin-bottom:12px;}
-.card-title{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px;}
-.field{margin-bottom:12px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:15px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.card-title{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:13px;display:flex;align-items:center;gap:6px;}
+.card-title-icon{width:20px;height:20px;border-radius:6px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:10px;}
+
+/* ── FIELDS ── */
+.field{margin-bottom:11px;}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
-.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:var(--white);}
-.field input,.field textarea{-webkit-appearance:none;}
-.field select{-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--navy);}
-.field textarea{height:65px;resize:none;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--white);transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.field textarea{height:64px;resize:none;}
+.field select{-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748B' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .gps-row{display:flex;gap:8px;align-items:flex-end;}
 .gps-row input{flex:1;}
-.gps-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-.check-item{background:var(--white);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;overflow:hidden;}
-.check-item.filled-sim{border-left:4px solid var(--sim);}
-.check-item.filled-nao{border-left:4px solid var(--nao);}
-.check-item.filled-na{border-left:4px solid #ccc;}
-.check-main{padding:11px 13px;}
-.check-risco{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
-.risco-MUITO-ALTO{color:var(--crit);}.risco-ALTO{color:var(--sim);}.risco-MODERADO{color:var(--mod);}
-.check-q{font-size:13px;line-height:1.4;margin-bottom:9px;}
-.check-hint{font-size:11px;color:var(--muted);margin-bottom:7px;font-style:italic;}
-.btn-group{display:flex;gap:6px;}
-.btn-res{flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:#fafafa;font-size:13px;font-weight:600;cursor:pointer;text-align:center;color:var(--muted);transition:all .15s;}
-.btn-res.active-sim{background:#fff3e0;border-color:#ffb74d;color:var(--sim);}
-.btn-res.active-nao{background:#e8f5e9;border-color:#81c784;color:var(--nao);}
-.btn-res.active-na{background:#f5f5f5;border-color:#bdbdbd;color:#555;}
-.nota-block{background:#fff8f4;border-top:1px solid #ffe0cc;padding:10px 13px;display:none;}
-.nota-block.show{display:block;}
-.nota-label{font-size:11px;font-weight:700;color:var(--sim);margin-bottom:6px;}
-.nota-btns{display:flex;gap:6px;margin-bottom:8px;}
-.btn-nota{flex:1;padding:7px;border-radius:8px;border:1px solid #ffb74d;background:#fff;font-size:13px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);}
-.btn-nota.n1.active{background:#f57c00;border-color:#f57c00;color:#fff;}
-.btn-nota.n2.active{background:#e65100;border-color:#e65100;color:#fff;}
-.btn-nota.n3.active{background:#b71c1c;border-color:#b71c1c;color:#fff;}
-.nota-desc{font-size:11px;color:var(--muted);margin-bottom:8px;}
-.obs-input{width:100%;padding:8px 10px;border:1px solid #ffb74d;border-radius:8px;font-size:13px;resize:none;height:58px;background:#fff;box-sizing:border-box;}
-.foto-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-.foto-slot-add{width:68px;height:68px;border:1.5px dashed #ffb74d;border-radius:8px;background:#fff8f4;cursor:pointer;font-size:10px;color:var(--sim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;}
-.foto-slot-img{position:relative;width:68px;height:68px;}
-.foto-slot-img img{width:68px;height:68px;object-fit:cover;border-radius:8px;border:1px solid #ffb74d;display:block;}
-.foto-del{position:absolute;top:-5px;right:-5px;background:#b71c1c;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;}
-.resolv-sep{border-top:1px dashed #ffb74d;margin-top:10px;padding-top:10px;}
-.resolv-q{font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;}
-.resolv-sim-block{background:#e8f5e9;border-radius:8px;padding:9px;border-left:3px solid #2e7d32;margin-top:8px;}
-.resolv-sim-title{font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:5px;}
-.plano-block{background:#f0f4ff;border-radius:8px;padding:9px;border-left:3px solid #1565c0;margin-top:8px;}
-.plano-title{font-size:10px;font-weight:700;color:#1565c0;margin-bottom:7px;}
-.plano-input{width:100%;padding:7px 10px;border:1px solid #90caf9;border-radius:8px;font-size:12px;background:#fff;box-sizing:border-box;margin-bottom:7px;}
-.plano-textarea{width:100%;padding:7px 10px;border:1px solid #90caf9;border-radius:8px;font-size:12px;background:#fff;box-sizing:border-box;resize:none;height:52px;margin-bottom:7px;}
-.plano-select{width:100%;padding:7px 10px;border:1px solid #90caf9;border-radius:8px;font-size:12px;background:#fff;box-sizing:border-box;margin-bottom:7px;-webkit-appearance:none;}
-.section-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.section-num{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.section-title{font-size:15px;font-weight:700;color:var(--navy);}
+.gps-btn{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+
+/* ── PROFILE CARD ── */
+.profile-avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--navy-mid),var(--accent));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;}
+.profile-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.profile-info{flex:1;}
+.profile-name{font-size:16px;font-weight:700;color:var(--navy);}
+.profile-email{font-size:12px;color:var(--muted);}
+.profile-empty{font-size:13px;color:var(--muted);font-style:italic;}
+
+/* ── HOME ── */
+.home-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:16px;padding:20px;margin-bottom:16px;color:#fff;position:relative;overflow:hidden;}
+.home-hero::before{content:'A';position:absolute;right:-10px;top:-10px;font-size:120px;font-weight:900;opacity:.05;letter-spacing:-5px;}
+.home-hero-title{font-size:24px;font-weight:900;letter-spacing:.5px;margin-bottom:2px;}
+.home-hero-sub{font-size:12px;opacity:.6;margin-bottom:14px;}
+.home-hero-tagline{font-size:11px;opacity:.4;font-style:italic;margin-top:8px;}
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.metric{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:12px 14px;box-shadow:var(--shadow);}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.metric-value{font-size:24px;font-weight:800;line-height:1;}
+.metric-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ── INSP CARDS ── */
+.insp-card{background:var(--white);border-radius:14px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);}
+.insp-card.pendente{border-left:4px solid var(--orange);}
+.insp-card.enviado{border-left:4px solid var(--green);}
+.insp-card-head{padding:12px 14px 8px;}
+.insp-row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
+.insp-torre{font-size:15px;font-weight:700;color:var(--navy);}
+.insp-idx{font-size:15px;font-weight:800;}
+.insp-meta{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.insp-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.insp-status{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.insp-status.enviado{background:var(--green-bg);color:var(--green);}
+.insp-status.pendente{background:var(--orange-bg);color:var(--orange);}
+.insp-actions{display:flex;border-top:1px solid var(--border);}
+.insp-btn{flex:1;padding:9px 4px;border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);border-right:1px solid var(--border);}
+.insp-btn:last-child{border-right:none;}
+.insp-btn:active{background:#F8FAFC;}
+
+/* ── SECTION HEADER ── */
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.section-num{width:34px;height:34px;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-md);}
+.section-title{font-size:16px;font-weight:700;color:var(--navy);}
 .section-sub{font-size:12px;color:var(--muted);margin-top:1px;}
-.btn-primary{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
-.btn-secondary{width:100%;background:transparent;color:var(--navy);border:1.5px solid var(--navy);border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
-.btn-danger{width:100%;background:#fff3e0;color:var(--sim);border:1.5px solid #ffb74d;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
-.nav-bottom{display:flex;gap:10px;margin-top:18px;padding-bottom:22px;}
-.nav-bottom .btn-primary{margin-top:0;}
-.nav-back{background:var(--white);color:var(--navy);border:1px solid var(--border);border-radius:10px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;flex-shrink:0;}
+
+/* ── CHECKLIST ITEMS ── */
+.check-item{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow);}
+.check-item.filled-sim{border-left:4px solid var(--orange);}
+.check-item.filled-nao{border-left:4px solid var(--green);}
+.check-item.filled-na{border-left:4px solid #CBD5E1;}
+.check-main{padding:12px 13px;}
+.check-risco{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.risco-MUITO-ALTO{color:var(--crit);}
+.risco-ALTO{color:var(--orange);}
+.risco-MODERADO{color:var(--mod);}
+.check-q{font-size:13px;line-height:1.45;margin-bottom:9px;color:var(--text);}
+.check-hint{font-size:11px;color:var(--muted);margin-bottom:8px;font-style:italic;}
+.btn-group{display:flex;gap:6px;}
+.btn-res{flex:1;padding:9px 4px;border-radius:9px;border:1.5px solid var(--border);background:#F8FAFC;font-size:13px;font-weight:600;cursor:pointer;text-align:center;color:var(--muted);transition:all .15s;}
+.btn-res.active-sim{background:#FFFBEB;border-color:var(--orange);color:var(--orange);}
+.btn-res.active-nao{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.btn-res.active-na{background:#F8FAFC;border-color:#CBD5E1;color:#64748B;}
+.btn-res:active{transform:scale(.97);}
+
+/* ── NOTA BLOCK ── */
+.nota-block{background:#FFFDF7;border-top:1px solid #FDE68A;padding:11px 13px;display:none;}
+.nota-block.show{display:block;}
+.nota-label{font-size:11px;font-weight:700;color:var(--orange);margin-bottom:6px;}
+.nota-btns{display:flex;gap:6px;margin-bottom:8px;}
+.btn-nota{flex:1;padding:8px 6px;border-radius:9px;border:1.5px solid #FDE68A;background:#fff;font-size:13px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);transition:all .15s;}
+.btn-nota.n1.active{background:#F59E0B;border-color:#F59E0B;color:#fff;}
+.btn-nota.n2.active{background:#EA580C;border-color:#EA580C;color:#fff;}
+.btn-nota.n3.active{background:#DC2626;border-color:#DC2626;color:#fff;}
+.nota-desc{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.obs-input{width:100%;padding:9px 11px;border:1.5px solid #FDE68A;border-radius:9px;font-size:13px;resize:none;height:60px;background:#fff;box-sizing:border-box;}
+.obs-input:focus{outline:none;border-color:var(--orange);}
+
+/* ── FOTOS ── */
+.foto-section{margin-top:10px;}
+.foto-section-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.foto-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.foto-slot-add{width:72px;height:72px;border:2px dashed #FDE68A;border-radius:10px;background:#FFFBEB;cursor:pointer;font-size:9px;color:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;transition:all .15s;}
+.foto-slot-add:active{background:#FEF3C7;transform:scale(.95);}
+.foto-slot-add-green{border-color:#6EE7B7;background:#F0FDF4;color:var(--green);}
+.foto-slot-img{position:relative;width:72px;height:72px;}
+.foto-slot-img img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1.5px solid #FDE68A;display:block;}
+.foto-del{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.foto-loading{width:72px;height:72px;border-radius:10px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:20px;animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* ── RESOLUÇÃO ── */
+.resolv-sep{border-top:1px dashed #FDE68A;margin-top:12px;padding-top:11px;}
+.resolv-q{font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;}
+.resolv-sim-block{background:var(--green-bg);border-radius:10px;padding:10px;border-left:3px solid var(--green);margin-top:8px;}
+.resolv-sim-title{font-size:10px;font-weight:700;color:var(--green);margin-bottom:6px;}
+.plano-block{background:#EFF6FF;border-radius:10px;padding:10px;border-left:3px solid var(--mod);margin-top:8px;}
+.plano-title{font-size:10px;font-weight:700;color:var(--mod);margin-bottom:8px;}
+.plano-input{width:100%;padding:8px 10px;border:1.5px solid #BFDBFE;border-radius:9px;font-size:12px;background:#fff;box-sizing:border-box;margin-bottom:7px;}
+.plano-textarea{width:100%;padding:8px 10px;border:1.5px solid #BFDBFE;border-radius:9px;font-size:12px;background:#fff;box-sizing:border-box;resize:none;height:54px;margin-bottom:7px;}
+.plano-select{width:100%;padding:8px 10px;border:1.5px solid #BFDBFE;border-radius:9px;font-size:12px;background:#fff;box-sizing:border-box;margin-bottom:7px;-webkit-appearance:none;}
+
+/* ── BIOMA ── */
+.bioma-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:5px;}
+.bioma-desc{font-size:11px;color:var(--muted);font-style:italic;line-height:1.4;}
+
+/* ── NAVIGATION ── */
+.nav-bottom{display:flex;gap:10px;margin-top:20px;padding-bottom:8px;}
+.btn-primary{width:100%;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-md);transition:all .15s;}
+.btn-primary:active{transform:scale(.98);opacity:.9;}
+.btn-secondary{width:100%;background:transparent;color:var(--navy);border:2px solid var(--navy);border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-secondary:active{background:#F0F4FA;}
+.btn-danger{width:100%;background:var(--orange-bg);color:var(--orange);border:2px solid #FDE68A;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;}
+.nav-back{background:var(--white);color:var(--navy);border:1.5px solid var(--border);border-radius:12px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;flex-shrink:0;box-shadow:var(--shadow);}
+
+/* ── FAB (Botão flutuante nova inspeção) ── */
+.fab{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;border:none;border-radius:50px;padding:15px 28px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(10,31,68,.4);display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:100;transition:all .2s;}
+.fab:active{transform:translateX(-50%) scale(.97);}
+
+/* ── RESULTADO ── */
 .rpt{font-size:13px;}
-.rpt-header{background:#0E2750;color:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;}
-.rpt-tower{font-size:19px;font-weight:700;}
-.rpt-tipo{font-size:10px;opacity:.6;margin-top:1px;}
+.rpt-header{background:var(--navy);color:#fff;border-radius:14px;padding:15px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;box-shadow:var(--shadow-md);}
+.rpt-tower{font-size:20px;font-weight:800;letter-spacing:.3px;}
+.rpt-tipo{font-size:10px;opacity:.55;margin-top:1px;}
 .rpt-meta{margin-top:8px;display:flex;flex-direction:column;gap:3px;}
-.rpt-meta-row{font-size:10px;opacity:.75;display:flex;gap:6px;}
-.rpt-meta-lbl{opacity:.6;}
+.rpt-meta-row{font-size:10px;opacity:.7;display:flex;gap:6px;}
+.rpt-meta-lbl{opacity:.55;}
 .rpt-right{text-align:right;flex-shrink:0;}
-.rpt-pct{font-size:38px;font-weight:800;line-height:1;}
-.rpt-idx-lbl{font-size:9px;opacity:.65;margin-top:2px;}
+.rpt-pct{font-size:40px;font-weight:900;line-height:1;letter-spacing:-1px;}
+.rpt-idx-lbl{font-size:9px;opacity:.6;margin-top:2px;}
 .rpt-risk{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-.rpt-two{display:flex;flex-direction:row;gap:10px;margin-bottom:10px;align-items:flex-start;}
-.rpt-radar-card{border:.5px solid #e0e4ed;border-radius:10px;padding:8px;background:#fff;display:flex;align-items:center;justify-content:center;}
-.rpt-mods{border:.5px solid #e0e4ed;border-radius:10px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:2px;}
-.rpt-mod-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:.5px solid #f0f0f0;}
+.rpt-two{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.rpt-radar-card{border:1px solid var(--border);border-radius:12px;padding:8px;background:var(--white);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+.rpt-mods{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--white);flex:1;box-shadow:var(--shadow);}
+.rpt-mod-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:.5px solid #F1F5F9;}
 .rpt-mod-row:last-child{border-bottom:none;}
-.rpt-mod-nm{font-size:12px;color:#6b7280;width:90px;flex-shrink:0;}
-.rpt-bw{flex:1;height:5px;background:#e8e8e8;border-radius:3px;}
+.rpt-mod-nm{font-size:11px;color:var(--muted);width:76px;flex-shrink:0;}
+.rpt-bw{flex:1;height:5px;background:#E2E8F0;border-radius:3px;}
 .rpt-bf{height:100%;border-radius:3px;}
 .rpt-mp{font-size:12px;font-weight:700;width:30px;text-align:right;flex-shrink:0;}
 .rpt-mr{font-size:11px;font-weight:700;flex-shrink:0;}
-.rpt-card{border:.5px solid #e0e4ed;border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden;}
-.rpt-card-hd{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;padding:7px 13px;border-bottom:.5px solid #e0e4ed;background:#f8f9fb;}
-.rpt-crit{padding:9px 13px;border-bottom:.5px solid #e0e4ed;}
+.rpt-card{border:1px solid var(--border);border-radius:12px;background:var(--white);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow);}
+.rpt-card-hd{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:8px 13px;border-bottom:1px solid var(--border);background:#F8FAFC;}
+.rpt-crit{padding:10px 13px;border-bottom:.5px solid var(--border);}
 .rpt-crit:last-child{border-bottom:none;}
 .rpt-crit-head{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;}
 .rpt-badge,.rpt-nota{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
-.rpt-mod-tag{font-size:10px;color:#6b7280;margin-left:auto;}
+.rpt-mod-tag{font-size:10px;color:var(--muted);margin-left:auto;}
 .rpt-crit-q{font-size:12px;line-height:1.4;margin-bottom:2px;}
-.rpt-crit-obs{font-size:11px;color:#6b7280;font-style:italic;margin-top:2px;}
-.rpt-fotos{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
-.rpt-crit-foto{border-radius:7px;border:.5px solid #e0e4ed;max-width:100%;max-height:180px;object-fit:contain;background:#f8f9fb;display:inline-block;}
-.rpt-resolv-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px;}
-.rpt-resolv-sim{background:#e8f5e9;color:#2e7d32;}
-.rpt-resolv-nao{background:#e3f2fd;color:#1565c0;}
-.rpt-plano-box{background:#f0f4ff;border-radius:6px;padding:7px 9px;margin-top:5px;border-left:3px solid #1565c0;}
+.rpt-crit-obs{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;}
+.rpt-fotos{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.rpt-crit-foto{border-radius:8px;border:.5px solid var(--border);object-fit:cover;background:#F8FAFC;}
+.rpt-resolv-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px;}
+.rpt-resolv-sim{background:var(--green-bg);color:var(--green);}
+.rpt-resolv-nao{background:var(--blue-bg);color:var(--mod);}
+.rpt-plano-box{background:#EFF6FF;border-radius:7px;padding:7px 9px;margin-top:5px;border-left:3px solid var(--mod);}
 .rpt-plano-row{font-size:11px;color:#374151;margin-top:2px;}
-.rpt-plano-lbl{font-weight:700;color:#1565c0;}
-.rpt-sec-hd{display:flex;align-items:center;gap:8px;padding:7px 13px;background:#f0f4fb;border-bottom:.5px solid #e0e4ed;}
-.rpt-sec-num{width:20px;height:20px;border-radius:50%;background:#0E2750;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rpt-plano-lbl{font-weight:700;color:var(--mod);}
+.rpt-sec-hd{display:flex;align-items:center;gap:8px;padding:7px 13px;background:#F8FAFC;border-bottom:.5px solid var(--border);}
+.rpt-sec-num{width:20px;height:20px;border-radius:6px;background:var(--navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .rpt-sec-nm{font-size:12px;font-weight:700;}
-.rpt-sec-sub{font-size:11px;color:#6b7280;margin-left:4px;}
-.rpt-ans{display:flex;gap:10px;padding:7px 13px;border-bottom:.5px solid #e0e4ed;align-items:flex-start;}
+.rpt-sec-sub{font-size:11px;color:var(--muted);margin-left:2px;}
+.rpt-ans{display:flex;gap:10px;padding:7px 13px;border-bottom:.5px solid var(--border);align-items:flex-start;}
 .rpt-ans:last-child{border-bottom:none;}
 .rpt-ans-res{flex-shrink:0;width:32px;}
 .rpt-res{font-size:10px;font-weight:700;padding:2px 5px;border-radius:20px;text-align:center;display:inline-block;white-space:nowrap;}
-.rpt-sim{background:#fff3e0;color:#e65100;}.rpt-nao{background:#e8f5e9;color:#2e7d32;}.rpt-na{background:#f5f5f5;color:#888;}
+.rpt-sim{background:var(--orange-bg);color:var(--orange);}
+.rpt-nao{background:var(--green-bg);color:var(--green);}
+.rpt-na{background:#F8FAFC;color:#94A3B8;}
 .rpt-ans-body{flex:1;}
 .rpt-ans-q{font-size:11px;line-height:1.4;}
-.rpt-ans-risco{font-size:10px;color:#6b7280;margin-top:1px;}
-.rpt-ans-nota{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#fff3e0;color:#e65100;}
-.rpt-ans-obs{font-size:10px;color:#6b7280;font-style:italic;margin-top:2px;}
-.rpt-sim-row{background:#fffbf5;}
+.rpt-ans-risco{font-size:10px;color:var(--muted);margin-top:1px;}
+.rpt-ans-nota{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--orange-bg);color:var(--orange);}
+.rpt-ans-obs{font-size:10px;color:var(--muted);font-style:italic;margin-top:2px;}
+.rpt-sim-row{background:#FFFDF7;}
 .rpt-tbl{width:100%;border-collapse:collapse;font-size:11px;}
-.rpt-tbl th{padding:6px 9px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;border-bottom:.5px solid #e0e4ed;background:#f8f9fb;}
+.rpt-tbl th{padding:6px 9px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:.5px solid var(--border);background:#F8FAFC;}
 .rpt-tbl th.c{text-align:center;}.rpt-tbl th.r{text-align:right;}
-.rpt-tbl td{padding:6px 9px;border-bottom:.5px solid #e0e4ed;vertical-align:middle;}
+.rpt-tbl td{padding:6px 9px;border-bottom:.5px solid var(--border);vertical-align:middle;}
 .rpt-tbl td.c{text-align:center;}.rpt-tbl td.r{text-align:right;}
 .rpt-tbl tr:last-child td{border-bottom:none;}
-.rpt-mod-hdr td{background:#0E2750;color:#fff;font-weight:700;font-size:11px;padding:6px 9px;}
-.rpt-subtotal td{background:#f0f4fb;font-weight:700;font-size:11px;border-top:.5px solid #c0c8d8;}
-.rpt-total td{background:#0E2750;color:#fff;font-weight:700;font-size:12px;}
+.rpt-mod-hdr td{background:var(--navy);color:#fff;font-weight:700;font-size:11px;padding:6px 9px;}
+.rpt-subtotal td{background:#F0F4FA;font-weight:700;font-size:11px;border-top:.5px solid #CBD5E1;}
+.rpt-total td{background:var(--navy);color:#fff;font-weight:700;font-size:12px;}
 .nota-c{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
-.rpt-tbl-bw{height:4px;background:#e8e8e8;border-radius:3px;margin-top:3px;}
+.rpt-tbl-bw{height:4px;background:#E2E8F0;border-radius:3px;margin-top:3px;}
 .rpt-tbl-bf{height:100%;border-radius:3px;}
-.rpt-footer{text-align:center;padding:9px;font-size:11px;color:#6b7280;border-top:.5px solid #e0e4ed;margin-top:4px;}
-.progress-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(14,39,80,.82);z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
+.rpt-footer{text-align:center;padding:10px;font-size:11px;color:var(--muted);border-top:.5px solid var(--border);margin-top:4px;}
+.rpt-atlas-badge{display:inline-flex;align-items:center;gap:5px;background:var(--navy);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;}
+
+/* ── OVERLAY DE PROGRESSO ── */
+.progress-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,31,68,.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .progress-overlay.show{display:flex;}
-.progress-box{background:#fff;border-radius:14px;padding:26px 30px;width:85%;max-width:340px;text-align:center;}
-.progress-title{font-size:15px;font-weight:700;color:#0E2750;margin-bottom:6px;}
-.progress-step{font-size:12px;color:#6b7280;margin-bottom:14px;min-height:18px;}
-.progress-track{height:8px;background:#e0e4ed;border-radius:4px;overflow:hidden;margin-bottom:8px;}
-.progress-fill-bar{height:100%;background:#1565c0;border-radius:4px;transition:width .4s ease;width:0%;}
-.progress-pct{font-size:13px;font-weight:700;color:#1565c0;}
-.progress-warn{font-size:11px;color:#e65100;margin-top:8px;}
-.insp-card{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
-.insp-card.pendente{border-left:4px solid var(--sim);}
-.insp-card.enviado{border-left:4px solid var(--nao);}
-.insp-card-head{padding:11px 13px 8px;}
-.insp-card-row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
-.insp-torre{font-size:15px;font-weight:700;color:var(--navy);}
-.insp-idx{font-size:14px;font-weight:800;}
-.insp-meta{font-size:11px;color:var(--muted);margin-bottom:6px;}
-.insp-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
-.insp-status.enviado{background:#e8f5e9;color:#2e7d32;}
-.insp-status.pendente{background:#fff3e0;color:#e65100;}
-.insp-actions{display:flex;gap:0;border-top:1px solid var(--border);}
-.insp-btn{flex:1;padding:9px 4px;border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);border-right:1px solid var(--border);}
-.insp-btn:last-child{border-right:none;}
-.dash-metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
-.dash-metric{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:11px 13px;}
-.dash-metric-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
-.dash-metric-value{font-size:22px;font-weight:800;}
-.empty-state{text-align:center;padding:40px 20px;}
-.empty-icon{font-size:48px;margin-bottom:12px;}
-.empty-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.empty-sub{font-size:13px;color:var(--muted);line-height:1.5;}
-.envio-step{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px 16px;margin-bottom:10px;}
-.envio-step-num{width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;flex-shrink:0;}
-.envio-step-title{font-size:14px;font-weight:700;}
-.step-done{background:#e8f5e9;color:#2e7d32;}
-.step-active{background:var(--navy);color:#fff;}
-.step-locked{background:#f3f4f6;color:#9ca3af;}
-.info-box{border-radius:8px;padding:8px 10px;margin-bottom:10px;border-left:3px solid;font-size:12px;line-height:1.5;}
-.info-box.blue{background:#e3f2fd;border-color:#1565c0;color:#1565c0;}
-.info-box.green{background:#e8f5e9;border-color:#2e7d32;color:#2e7d32;}
-.info-box.orange{background:#fff3e0;border-color:#e65100;color:#e65100;}
-@media print{.header,.nav-bottom,.btn-primary,.btn-secondary,.btn-danger,.rpt-actions-bar,.envio-step{display:none !important;}.section{display:none !important;}#s8{display:block !important;padding:0 !important;}.rpt-header,.rpt-mod-hdr td,.rpt-total td{-webkit-print-color-adjust:exact;print-color-adjust:exact;}body{background:#fff;}}
+.progress-box{background:#fff;border-radius:18px;padding:28px 32px;width:88%;max-width:340px;text-align:center;box-shadow:var(--shadow-lg);}
+.progress-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+.progress-step{font-size:12px;color:var(--muted);margin-bottom:14px;min-height:18px;}
+.progress-track{height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.progress-fill-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+.progress-pct{font-size:13px;font-weight:700;color:var(--accent);}
+.progress-warn{font-size:11px;color:var(--orange);margin-top:8px;}
+
+/* ── MODAL PERFIL ── */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,31,68,.6);z-index:500;align-items:flex-end;backdrop-filter:blur(3px);}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-height:85vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:#E2E8F0;border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:16px;}
+
+/* ── INFO BOX ── */
+.info-box{border-radius:10px;padding:9px 11px;margin-bottom:10px;border-left:3px solid;font-size:12px;line-height:1.5;}
+.info-box.blue{background:var(--blue-bg);border-color:var(--mod);color:var(--mod);}
+.info-box.green{background:var(--green-bg);border-color:var(--green);color:#065F46;}
+.info-box.orange{background:var(--orange-bg);border-color:var(--orange);color:#92400E;}
+.info-box.red{background:var(--red-bg);border-color:var(--red);color:#991B1B;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:44px 20px;}
+.empty-icon{font-size:52px;margin-bottom:14px;}
+.empty-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--muted);line-height:1.55;}
+
+/* ── ENVIO ── */
+.envio-feedback{display:none;margin-top:10px;padding:11px 13px;border-radius:10px;font-size:12px;font-weight:600;line-height:1.6;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+
+/* ── MINI CHART BARS ── */
+.mini-chart-item{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.mini-chart-label{font-size:11px;color:var(--muted);width:58px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mini-chart-bar-wrap{flex:1;height:14px;background:#F1F5F9;border-radius:7px;overflow:hidden;position:relative;}
+.mini-chart-bar{position:absolute;left:0;top:0;height:100%;border-radius:7px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.mini-chart-pct{font-size:11px;font-weight:700;width:32px;text-align:right;}
+.mini-chart-status{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+
+@media print{
+  .header,.nav-bottom,.btn-primary,.btn-secondary,.btn-danger,.fab,.sync-banner,.modal-overlay{display:none !important;}
+  .section{display:none !important;}
+  #s8{display:block !important;padding:0 !important;}
+  .rpt-header,.rpt-mod-hdr td,.rpt-total td{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  body{background:#fff;}
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════════ HEADER ═══════════════════════════ -->
 <div class="header">
   <div class="header-top">
-    <div><div class="header-title">HRZ Transmissoras</div><div class="header-sub" id="header-sub">PQI Climate</div></div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="btn-home-back" onclick="goTo('home')" style="display:none;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">← Início</button>
-      <div style="font-size:11px;opacity:.6;" id="header-step"></div>
+    <div class="header-brand">
+      <div class="header-logo">A</div>
+      <div>
+        <div class="header-title" id="header-title">ATLAS</div>
+        <div class="header-sub" id="header-sub">HRZ Transmissoras</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button id="btn-home-back" onclick="goTo('home')" style="display:none;" class="header-btn">← Início</button>
+      <div class="header-step" id="header-step"></div>
+      <button onclick="openProfile()" class="header-btn" id="btn-profile" title="Meu Perfil">👤</button>
     </div>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
 </div>
 
-<!-- HOME -->
-<div class="section active" id="s-home">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:4px;">
-    <div>
-      <div style="font-size:18px;font-weight:800;color:var(--navy)">Minhas Inspeções</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Histórico salvo neste dispositivo</div>
-    </div>
-  </div>
-  <div id="dash-content"></div>
-  <button class="btn-primary" onclick="iniciarNovaInspecao()" style="position:sticky;bottom:16px;margin-top:8px;font-size:16px;padding:15px;box-shadow:0 4px 12px rgba(14,39,80,.3);">+ Nova inspeção</button>
+<!-- SYNC BANNER -->
+<div class="sync-banner" id="sync-banner">
+  <div class="sync-dot pulse" id="sync-dot"></div>
+  <span id="sync-msg">Sincronizando inspeções pendentes...</span>
+  <button class="sync-banner-btn" onclick="triggerManualSync()" id="sync-manual-btn">Sincronizar</button>
 </div>
 
-<!-- S0 -->
+<!-- ═══════════════════════ HOME ══════════════════════════════ -->
+<div class="section active" id="s-home">
+
+  <div class="home-hero">
+    <div style="font-size:11px;font-weight:700;opacity:.45;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Plataforma de Inspeções Climáticas</div>
+    <div class="home-hero-title">ATLAS</div>
+    <div class="home-hero-sub" id="hero-greeting">HRZ Transmissoras</div>
+    <div id="hero-profile-info" style="margin-top:10px;display:none;">
+      <div style="font-size:13px;font-weight:600;opacity:.9;" id="hero-name"></div>
+      <div style="font-size:11px;opacity:.5;" id="hero-empresa"></div>
+    </div>
+    <div class="home-hero-tagline">O mundo não pode parar.</div>
+  </div>
+
+  <div class="metric-grid" id="dash-metrics"></div>
+
+  <div id="dash-mini-chart"></div>
+
+  <div id="dash-inspections"></div>
+
+  <!-- Botão flutuante -->
+  <button class="fab" onclick="iniciarNovaInspecao()">
+    <span style="font-size:20px;">+</span> Nova inspeção
+  </button>
+
+</div>
+
+<!-- ═══════════════════════ S0 — IDENTIFICAÇÃO ═══════════════ -->
 <div class="section" id="s0">
   <div class="card">
-    <div class="card-title">Identificação da Inspeção</div>
+    <div class="card-title"><span class="card-title-icon">🏗️</span>Identificação da Inspeção</div>
     <div class="field-row">
       <div class="field"><label>ID da Torre</label><input type="text" id="id_torre" placeholder="ex: T-047"></div>
       <div class="field"><label>Circuito</label><input type="text" id="circuito" placeholder="ex: C1"></div>
     </div>
     <div class="field"><label>Concessão</label>
-      <select id="concessao" onchange="atualizarLinhas()"><option value="">Selecione</option><option value="Horizon">Horizon</option><option value="Skyline">Skyline</option><option value="Edge">Edge</option><option value="Litoral Sul">Litoral Sul</option></select>
+      <select id="concessao" onchange="atualizarLinhas()">
+        <option value="">Selecione</option>
+        <option value="Horizon">Horizon</option>
+        <option value="Skyline">Skyline</option>
+        <option value="Edge">Edge</option>
+        <option value="Litoral Sul">Litoral Sul</option>
+      </select>
     </div>
     <div class="field"><label>Linha</label><select id="linha"><option value="">— selecione a concessão primeiro —</option></select></div>
     <div class="field-row">
@@ -236,88 +418,143 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="field"><label>2º Inspetor (opcional)</label><input type="text" id="inspetor2"></div>
     <div class="field"><label>Supervisor HRZ</label><input type="text" id="supervisor"></div>
     <div class="field"><label>Tipo de torre</label>
-      <select id="tipo_torre"><option value="">Selecione</option><option>Autoportante</option><option>Estaiada</option><option>Terminal / ancoragem</option><option>Ângulo</option><option>Outro</option></select>
+      <select id="tipo_torre">
+        <option value="">Selecione</option>
+        <option>Autoportante</option>
+        <option>Estaiada</option>
+        <option>Terminal / ancoragem</option>
+        <option>Ângulo</option>
+        <option>Outro</option>
+      </select>
     </div>
     <div class="field"><label>GPS (Lat / Long)</label>
-      <div class="gps-row"><input type="text" id="gps_lat" placeholder="Latitude"><input type="text" id="gps_lon" placeholder="Longitude"><button class="gps-btn" onclick="captureGPS()">Capturar</button></div>
+      <div class="gps-row">
+        <input type="text" id="gps_lat" placeholder="Latitude">
+        <input type="text" id="gps_lon" placeholder="Longitude">
+        <button class="gps-btn" onclick="captureGPS()">📍</button>
+      </div>
     </div>
     <div class="field"><label>Condições meteorológicas</label>
-      <select id="meteo"><option value="">—</option><option>Ensolarado / seco</option><option>Parcialmente nublado</option><option>Nublado</option><option>Chuva leve</option><option>Pós-chuva</option><option>Vento forte</option></select>
+      <select id="meteo">
+        <option value="">—</option>
+        <option>Ensolarado / seco</option>
+        <option>Parcialmente nublado</option>
+        <option>Nublado</option>
+        <option>Chuva leve</option>
+        <option>Pós-chuva</option>
+        <option>Vento forte</option>
+      </select>
     </div>
     <div class="field"><label>Temperatura (°C)</label><input type="number" id="temperatura" placeholder="ex: 28"></div>
   </div>
   <button class="btn-primary" onclick="goTo(1)">Iniciar inspeção →</button>
 </div>
 
-<!-- S1-S7 -->
-<div class="section" id="s1"><div class="section-header"><div class="section-num">1</div><div><div class="section-title">Via de Acesso</div><div class="section-sub">Avalie antes de chegar à torre</div></div></div><div id="items-s1"></div><div class="nav-bottom"><button class="nav-back" onclick="goTo(0)">←</button><button class="btn-primary" onclick="goTo(2)">Próximo →</button></div></div>
-<div class="section" id="s2"><div class="section-header"><div class="section-num">2</div><div><div class="section-title">Praça e Base da Torre</div><div class="section-sub">Terreno, fundação e entorno imediato</div></div></div><div id="items-s2"></div><div class="nav-bottom"><button class="nav-back" onclick="goTo(1)">←</button><button class="btn-primary" onclick="goTo(3)">Próximo →</button></div></div>
-<div class="section" id="s3"><div class="section-header"><div class="section-num">3</div><div><div class="section-title">Aterramento e Drenagem</div><div class="section-sub">Cabos de terra, canaletas e APP</div></div></div><div id="items-s3"></div><div class="nav-bottom"><button class="nav-back" onclick="goTo(2)">←</button><button class="btn-primary" onclick="goTo(4)">Próximo →</button></div></div>
-<div class="section" id="s4"><div class="section-header"><div class="section-num">4</div><div><div class="section-title">Estrutura e Cabos</div><div class="section-sub">Componentes acima da base</div></div></div><div id="items-s4"></div><div class="nav-bottom"><button class="nav-back" onclick="goTo(3)">←</button><button class="btn-primary" onclick="goTo(5)">Próximo →</button></div></div>
-<div class="section" id="s5"><div class="section-header"><div class="section-num">5</div><div><div class="section-title">Descargas Elétricas (Raios)</div><div class="section-sub">Pára-raios, marcas e contexto geográfico</div></div></div><div id="items-s5"></div><div class="nav-bottom"><button class="nav-back" onclick="goTo(4)">←</button><button class="btn-primary" onclick="goTo(6)">Próximo →</button></div></div>
+<!-- ═══════════════════════ S1–S7 ═════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header"><div class="section-num">1</div><div><div class="section-title">Via de Acesso</div><div class="section-sub">Avalie antes de chegar à torre</div></div></div>
+  <div id="items-s1"></div>
+  <div class="nav-bottom"><button class="nav-back" onclick="goTo(0)">←</button><button class="btn-primary" onclick="goTo(2)">Próximo →</button></div>
+</div>
+
+<div class="section" id="s2">
+  <div class="section-header"><div class="section-num">2</div><div><div class="section-title">Praça e Base da Torre</div><div class="section-sub">Terreno, fundação e entorno imediato</div></div></div>
+  <div id="items-s2"></div>
+  <div class="nav-bottom"><button class="nav-back" onclick="goTo(1)">←</button><button class="btn-primary" onclick="goTo(3)">Próximo →</button></div>
+</div>
+
+<div class="section" id="s3">
+  <div class="section-header"><div class="section-num">3</div><div><div class="section-title">Aterramento e Drenagem</div><div class="section-sub">Cabos de terra, canaletas e APP</div></div></div>
+  <div id="items-s3"></div>
+  <div class="nav-bottom"><button class="nav-back" onclick="goTo(2)">←</button><button class="btn-primary" onclick="goTo(4)">Próximo →</button></div>
+</div>
+
+<div class="section" id="s4">
+  <div class="section-header"><div class="section-num">4</div><div><div class="section-title">Estrutura e Cabos</div><div class="section-sub">Componentes acima da base</div></div></div>
+  <div id="items-s4"></div>
+  <div class="nav-bottom"><button class="nav-back" onclick="goTo(3)">←</button><button class="btn-primary" onclick="goTo(5)">Próximo →</button></div>
+</div>
+
+<div class="section" id="s5">
+  <div class="section-header"><div class="section-num">5</div><div><div class="section-title">Descargas Elétricas (Raios)</div><div class="section-sub">Pára-raios, marcas e contexto geográfico</div></div></div>
+  <div id="items-s5"></div>
+  <div class="nav-bottom"><button class="nav-back" onclick="goTo(4)">←</button><button class="btn-primary" onclick="goTo(6)">Próximo →</button></div>
+</div>
+
 <div class="section" id="s6">
   <div class="section-header"><div class="section-num">6</div><div><div class="section-title">Incêndio e Calor</div><div class="section-sub">Vegetação, queimadas e risco de fogo</div></div></div>
   <div class="card" style="margin-bottom:10px;">
-    <div class="card-title">Bioma e Vegetação</div>
+    <div class="card-title"><span class="card-title-icon">🌿</span>Bioma e Vegetação</div>
     <div class="field"><label>Bioma predominante</label>
-      <select id="bioma_select" onchange="atualizarRiscoBioma()"><option value="">Selecione</option><option value="Amazônia">Amazônia</option><option value="Cerrado">Cerrado</option><option value="Caatinga">Caatinga</option><option value="Mata Atlântica">Mata Atlântica</option><option value="Pampa">Pampa</option><option value="Pantanal">Pantanal</option></select>
+      <select id="bioma_select" onchange="atualizarRiscoBioma()">
+        <option value="">Selecione</option>
+        <option value="Amazônia">Amazônia</option>
+        <option value="Cerrado">Cerrado</option>
+        <option value="Caatinga">Caatinga</option>
+        <option value="Mata Atlântica">Mata Atlântica</option>
+        <option value="Pampa">Pampa</option>
+        <option value="Pantanal">Pantanal</option>
+      </select>
     </div>
-    <div id="bioma-risco-block" style="display:none;margin-bottom:8px;"><div id="bioma-risco-badge" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:6px;"></div><div id="bioma-risco-desc" style="font-size:11px;color:#6b7280;font-style:italic;line-height:1.4;"></div></div>
+    <div id="bioma-risco-block" style="display:none;margin-bottom:8px;">
+      <div id="bioma-risco-badge" class="bioma-badge"></div>
+      <div id="bioma-risco-desc" class="bioma-desc"></div>
+    </div>
     <div class="field"><label>Vegetação predominante</label><input type="text" id="vegetacao_livre" placeholder="ex: pastagem, eucalipto..."></div>
   </div>
   <div id="items-s6"></div>
   <div class="nav-bottom"><button class="nav-back" onclick="goTo(5)">←</button><button class="btn-primary" onclick="goTo(7)">Próximo →</button></div>
 </div>
+
 <div class="section" id="s7">
   <div class="section-header"><div class="section-num">7</div><div><div class="section-title">Histórico e Manutenção</div><div class="section-sub">Corrosão, registros e monitoramento</div></div></div>
   <div id="items-s7"></div>
   <div class="card" style="margin-top:12px;">
-    <div class="card-title">Observações Finais</div>
+    <div class="card-title"><span class="card-title-icon">📝</span>Conclusão</div>
     <div class="field"><label>Observações gerais</label><textarea id="obs_gerais" placeholder="Registre observações não cobertas pelos itens acima..."></textarea></div>
     <div class="field"><label>Hora de término</label><input type="time" id="hora_fim"></div>
-    <div class="card-title" style="margin-top:6px;">Confirmação</div>
-    <div class="field"><label>Nome completo (confirmação)</label><input type="text" id="assina_nome" placeholder="Confirme seu nome"></div>
-    <div class="field"><label>Declaro que as informações são verídicas</label><select id="assina_conf"><option value="">—</option><option value="sim">Sim, confirmo</option></select></div>
   </div>
   <div class="nav-bottom"><button class="nav-back" onclick="goTo(6)">←</button><button class="btn-primary" onclick="calcularEIr(8)">Ver Resultado →</button></div>
 </div>
 
-<!-- S8: RESULTADO + ENVIO -->
+<!-- ═══════════════════════ S8 — RESULTADO ═══════════════════ -->
 <div class="section" id="s8">
   <div style="padding:0 0 8px;">
-
-    <!-- Gerar PDF (pré-requisito) -->
-    <!-- Instruções -->
-    <div class="card" style="margin-bottom:12px;border-left:4px solid var(--navy);">
-      <div class="card-title">Como proceder</div>
-      <div style="font-size:13px;line-height:1.8;color:var(--text);">
-        <div>1. Clique em <strong>"Finalizar e Sincronizar"</strong> para gerar o PDF e salvar os dados</div>
-        <div>2. Para enviar o relatório pelo WhatsApp, encaminhe para:</div>
-        <div style="font-size:15px;font-weight:700;color:var(--navy);margin:6px 0 0 16px;">+55 11 99922-5270</div>
-      </div>
-    </div>
-
-    <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarSincronizarCompartilhar()" style="background:#0E2750;font-size:16px;padding:15px;">📋 Finalizar e Sincronizar</button>
-
-    <div id="envio-feedback" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.6;"></div>
-
-    <!-- Ações pós-PDF (inicialmente ocultas) -->
+    <button class="btn-primary" id="btn-gerar-pdf" onclick="gerarPDFBase()" style="font-size:16px;padding:15px;">📄 Gerar PDF</button>
+    <div class="envio-feedback" id="envio-feedback"></div>
     <div id="acoes-pos-pdf" style="display:none;margin-top:12px;">
-      <button class="btn-primary" id="btn-compartilhar" onclick="compartilharPDF()" style="background:#25D366;font-size:15px;padding:13px;">📤 Compartilhar PDF</button>
+      <button class="btn-primary" id="btn-compartilhar" onclick="compartilharPDF()" style="background:#25D366;font-size:15px;padding:13px;">📤 Compartilhar (WhatsApp)</button>
+      <button class="btn-primary" id="btn-sincronizar" onclick="sincronizarSharePoint()" style="background:#0078d4;font-size:15px;padding:13px;margin-top:8px;">☁️ Sincronizar com SharePoint</button>
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
         <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Backup por e-mail</div>
         <div class="field" style="margin-bottom:8px;"><label>E-mails extras (opcional) — separe por ;</label><input type="text" id="email_cc" placeholder="fulano@empresa.com; ciclano@empresa.com"></div>
         <button class="btn-secondary" id="btn-email" onclick="abrirEmail()" style="margin-top:0;">📧 Enviar por e-mail</button>
       </div>
     </div>
-
     <button class="btn-secondary" onclick="goTo(7)" style="margin-top:12px;">← Revisar checklist</button>
   </div>
   <div id="rpt-content" class="rpt" style="margin-top:8px;"></div>
 </div>
 
+<!-- ═══════════════════════ MODAL PERFIL ═════════════════════ -->
+<div class="modal-overlay" id="modal-profile" onclick="if(event.target===this)closeProfile()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Meu Perfil</div>
+    <div class="info-box blue">Preencha uma vez — seus dados serão pré-carregados em todas as inspeções.</div>
+    <div class="field"><label>Nome completo</label><input type="text" id="p_nome" placeholder="Seu nome"></div>
+    <div class="field"><label>E-mail</label><input type="email" id="p_email" placeholder="seu@email.com"></div>
+    <div class="field"><label>Empresa / Contratada</label><input type="text" id="p_empresa" placeholder="Nome da empresa"></div>
+    <div class="field"><label>Supervisor HRZ padrão</label><input type="text" id="p_supervisor" placeholder="Nome do supervisor"></div>
+    <button class="btn-primary" onclick="saveProfile()" style="margin-top:4px;">Salvar perfil</button>
+    <button class="btn-secondary" onclick="closeProfile()" style="margin-top:8px;">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PROGRESS OVERLAY ═════════════════ -->
 <div class="progress-overlay" id="progress-overlay">
   <div class="progress-box">
+    <div style="font-size:22px;font-weight:900;color:var(--navy);letter-spacing:.5px;margin-bottom:4px;">ATLAS</div>
     <div class="progress-title" id="prog-title">Processando...</div>
     <div class="progress-step" id="prog-step">Aguarde</div>
     <div class="progress-track"><div class="progress-fill-bar" id="prog-bar"></div></div>
@@ -326,807 +563,1194 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ATLAS — JavaScript Core
+// HRZ Transmissoras · Plataforma de Inspeções Climáticas de Ativos
+// ═══════════════════════════════════════════════════════════════
+
+// ── CONSTANTES ────────────────────────────────────────────────
 const ITENS={s1:[{id:'a01',mod:'M1',risco:'ALTO',peso:2,q:'A via de acesso apresenta erosão, buracos ou obstáculos que dificultam o tráfego?',hint:'Sim = condição que compromete o acesso seguro à torre.'},{id:'a02',mod:'M1',risco:'ALTO',peso:2,q:'Existe ponte, bueiro ou passagem d\'água no acesso com estrutura comprometida?',hint:'Se não há passagem: N/A.'},{id:'a03',mod:'M1',risco:'ALTO',peso:2,q:'A via de acesso está bloqueada ou com risco de bloqueio por deslizamento ou enxurrada?',hint:''}],s2:[{id:'b01',mod:'M1',risco:'ALTO',peso:2,q:'Há solo exposto ou erodido em raio de 20m ao redor da base da torre?',hint:''},{id:'b02',mod:'M1',risco:'ALTO',peso:2,q:'O terreno tem declividade elevada (> 20%) com risco de escorregamento?',hint:''},{id:'b03',mod:'M1',risco:'MUITO ALTO',peso:3,q:'As sapatas ou fundações da torre estão expostas ou com solo removido ao redor?',hint:''},{id:'b04',mod:'M1',risco:'ALTO',peso:2,q:'Há acúmulo de água empoçada ou marcas de alagamento ao redor da fundação?',hint:''},{id:'b05',mod:'M1',risco:'MUITO ALTO',peso:3,q:'As fundações apresentam trincas, deslocamentos ou deformações visíveis?',hint:''},{id:'b06',mod:'M1',risco:'MODERADO',peso:1,q:'Há atividade agrícola com solo revolvido ou culturas propícias a queimadas a menos de 50m?',hint:''},{id:'b07',mod:'M1',risco:'ALTO',peso:2,q:'Há sinais de assoreamento nas drenagens próximas à base ou ao acesso?',hint:''},{id:'b08',mod:'M1',risco:'MODERADO',peso:2,q:'Há corpo d\'água (rio, córrego, lagoa) a menos de 200m da base da torre?',hint:'Sim = APP identificada.'}],s3:[{id:'c01',mod:'M3',risco:'MUITO ALTO',peso:3,q:'Os cabos de aterramento estão com dano, conexão solta, ruptura ou trecho não enterrado?',hint:'Ref. NBR 5419.'},{id:'c02',mod:'M5',risco:'ALTO',peso:2,q:'As canaletas de drenagem ao redor da base estão obstruídas, danificadas ou inexistentes?',hint:''}],s4:[{id:'d01',mod:'M2',risco:'MUITO ALTO',peso:3,q:'Existem parafusos ou ligações com folga, oxidação severa ou porcas/contraporcas ausentes?',hint:''},{id:'d02',mod:'M2',risco:'ALTO',peso:2,q:'A torre está em cumeada, encosta exposta a ventos predominantes ou corredor de vale?',hint:''},{id:'d03',mod:'M2',risco:'MODERADO',peso:1,q:'A torre está sem barreiras naturais (mata ou relevo) que amortizem as rajadas de vento?',hint:''},{id:'d04',mod:'M2',risco:'ALTO',peso:2,q:'Os cabos condutores, pára-raios ou cabos de aterramento apresentam dano físico visível?',hint:''},{id:'d05',mod:'M2',risco:'MODERADO',peso:1,q:'Existem conexões ou amortecedores ausentes, fora de posição ou danificados?',hint:''},{id:'d06',mod:'M2',risco:'MUITO ALTO',peso:3,q:'Há árvores de grande porte com risco de queda sobre a linha na zona de proteção?',hint:''},{id:'d07',mod:'M2',risco:'ALTO',peso:2,q:'É necessária poda ou supressão de vegetação para manter a faixa de servidão livre?',hint:''},{id:'d08',mod:'M5',risco:'ALTO',peso:2,q:'A estrutura apresenta corrosão visível (ferrugem avançada, galvanização ou pintura deteriorada)?',hint:''}],s5:[{id:'e01',mod:'M3',risco:'MUITO ALTO',peso:3,q:'O sistema pára-raios (cabo guarda) apresenta falha — ausência, ruptura ou fixações soltas?',hint:''},{id:'e02',mod:'M3',risco:'MUITO ALTO',peso:3,q:'Existem evidências visuais de impacto de raio (marcas de queima, fusão ou ruptura)?',hint:''},{id:'e03',mod:'M3',risco:'MUITO ALTO',peso:3,q:'Há danos em isoladores ou ferragens por sobretenção de raio (estrias, carvão, ruptura)?',hint:''},{id:'e04',mod:'M3',risco:'ALTO',peso:2,q:'A torre está em área de alta densidade de descargas atmosféricas (> 6 GFD/km²/ano)?',hint:'Se sem sinal: marque N/A.'},{id:'e05',mod:'M3',risco:'ALTO',peso:2,q:'A torre está em região de alta atividade convectiva (vales encaixados, depressões ou entre serras)?',hint:''},{id:'e06',mod:'M3',risco:'ALTO',peso:2,q:'Os isoladores apresentam trincas, quebras, contaminação severa ou desalinhamento?',hint:''}],s6:[{id:'f02',mod:'M4',risco:'ALTO',peso:2,q:'Há vegetação seca ou resíduos combustíveis a menos de 10m da base da torre?',hint:''},{id:'f03',mod:'M4',risco:'MUITO ALTO',peso:3,q:'Existem sinais de queimada recente no entorno (solo enegrecido, vegetação carbonizada)?',hint:''},{id:'f04',mod:'M4',risco:'ALTO',peso:2,q:'Há linha de distribuição de baixa tensão a menos de 30m da torre?',hint:''},{id:'f05',mod:'M4',risco:'MODERADO',peso:1,q:'Há propriedades rurais ou comunidades na faixa de servidão com risco de origem de fogo?',hint:''}],s7:[{id:'g01',mod:'M5',risco:'MUITO ALTO',peso:3,q:'A torre sofreu evento climático conhecido (queda, afundamento, raio, incêndio) sem ação corretiva registrada?',hint:''},{id:'g02',mod:'M5',risco:'ALTO',peso:2,q:'Existem reparos ou reforços anteriores que indicam vulnerabilidade recorrente?',hint:''},{id:'g03',mod:'M5',risco:'MODERADO',peso:1,q:'A região está sem cobertura de monitoramento meteorológico (estação automática a mais de 50km)?',hint:''},{id:'g04',mod:'M5',risco:'MODERADO',peso:1,q:'O local está sem sinal de celular ou rádio para acionamento de emergência?',hint:''},{id:'g05',mod:'INFO',risco:'MODERADO',peso:0,q:'Há Unidade de Conservação (UC) ou Área de Proteção Ambiental (APA) no entorno?',hint:'Item informativo — não entra no cálculo.'}]};
+
 const MAX_MOD={M1:69,M2:42,M3:54,M4:33,M5:33};
 const MOD_NAMES={M1:'M1 — Chuvas/Erosão',M2:'M2 — Ventos',M3:'M3 — Raios',M4:'M4 — Incêndio',M5:'M5 — Manutenção'};
 const BIOMA_NOTA={'Cerrado':3,'Caatinga':3,'Pantanal':2,'Mata Atlântica':1,'Pampa':1,'Amazônia':0};
-const BIOMA_RISCO_INFO={'Cerrado':{nivel:'MUITO ALTO',cor:'#b71c1c',bg:'#ffebee',desc:'Bioma com maior incidência histórica de queimadas no Brasil.'},'Caatinga':{nivel:'ALTO',cor:'#e65100',bg:'#fff3e0',desc:'Vegetação xerófila. Risco elevado jun–nov.'},'Pantanal':{nivel:'ALTO',cor:'#e65100',bg:'#fff3e0',desc:'Risco elevado na estação seca (maio–outubro).'},'Mata Atlântica':{nivel:'MODERADO',cor:'#1565c0',bg:'#e3f2fd',desc:'Risco moderado em fragmentos degradados.'},'Pampa':{nivel:'MODERADO',cor:'#1565c0',bg:'#e3f2fd',desc:'Risco moderado em pastagens.'},'Amazônia':{nivel:'BAIXO',cor:'#2e7d32',bg:'#e8f5e9',desc:'Baixo risco em áreas preservadas.'}};
+const BIOMA_RISCO_INFO={'Cerrado':{nivel:'MUITO ALTO',cor:'#DC2626',bg:'#FEF2F2',desc:'Bioma com maior incidência histórica de queimadas no Brasil.'},'Caatinga':{nivel:'ALTO',cor:'#F59E0B',bg:'#FFFBEB',desc:'Vegetação xerófila. Risco elevado jun–nov.'},'Pantanal':{nivel:'ALTO',cor:'#F59E0B',bg:'#FFFBEB',desc:'Risco elevado na estação seca (maio–outubro).'},'Mata Atlântica':{nivel:'MODERADO',cor:'#2563EB',bg:'#EFF6FF',desc:'Risco moderado em fragmentos degradados.'},'Pampa':{nivel:'MODERADO',cor:'#2563EB',bg:'#EFF6FF',desc:'Risco moderado em pastagens.'},'Amazônia':{nivel:'BAIXO',cor:'#10B981',bg:'#ECFDF5',desc:'Baixo risco em áreas preservadas.'}};
 const LINHAS={'Horizon':['TMAI','TMAII','T-ES'],'Skyline':['MGTE','SPMG'],'Edge':['Aliança','Vineyards','AVT'],'Litoral Sul':['Litoral Sul']};
 const WA_NUMBER='5511999225270';
 const EMAIL_FIXO='natalia.moraes@hrztransmissoras.com.br';
-const WEBHOOK_URL='https://default8b13eaf7b8a04dafb92e2c2fee9823.84.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2691ae4f43fe435c9098be82b046ada1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fQ99eA_ztEwPoCBh-ZzNgGtICq1-T4xRrjhciqfx8B0';
-const WEBHOOK_CHECKLIST_URL='https://default8b13eaf7b8a04dafb92e2c2fee9823.84.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5aa09aac32644fff850738d065af77f8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vMDpBI6oi8Um3Nfll4b9m46RzH-p87oetmW0jh40fy4';
+// ── ENDPOINTS POWER AUTOMATE ─────────────────────────────────
+// Cole aqui as URLs dos fluxos após abrir cada fluxo no Power Automate → Editar → Trigger HTTP → Ver URL
+const WEBHOOK_IDENTIFICATION='https://default8b13eaf7b8a04dafb92e2c2fee9823.84.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2691ae4f43fe435c9098be82b046ada1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=fQ99eA_ztEwPoCBh-ZzNgGtICq1-T4xRrjhciqfx8B0';
+const WEBHOOK_ANSWERS='https://default8b13eaf7b8a04dafb92e2c2fee9823.84.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5aa09aac32644fff850738d065af77f8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vMDpBI6oi8Um3Nfll4b9m46RzH-p87oetmW0jh40fy4';
+const WEBHOOK_PDF='https://default8b13eaf7b8a04dafb92e2c2fee9823.84.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/04442989261143cc899bddfcf86fafb7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ypkkue-BivGyYjjRCOcEmeudwG7fbxw1XMFWCoCdVKU';
 
-var estado={},_itemSec={},_pdfGenerated=false,_sendDone=false,_currentInspId=null;
+// ── LOOKUP: item → nome da seção (para o campo Secao do PQI_Spec) ─
+const SEC_NOMES={s1:'Via de Acesso',s2:'Praça e Base da Torre',s3:'Aterramento e Drenagem',s4:'Estrutura e Cabos',s5:'Descargas Elétricas (Raios)',s6:'Incêndio e Calor',s7:'Histórico e Manutenção'};
+const ITEM_SEC_KEY={};
+Object.entries(ITENS).forEach(([sk,items])=>items.forEach(it=>{ITEM_SEC_KEY[it.id]=sk;}));
 
+// ── STATE ──────────────────────────────────────────────────────
+var estado={},_itemSec={},_pdfGenerated=false,_currentInspId=null;
+
+// ── HELPERS ────────────────────────────────────────────────────
 function notaDesc(n){return n==1?'1 — Atenção / Monitorar':n==2?'2 — Problema — ação programada':'3 — Crítico — ação imediata';}
 function riskLabel(p){return p>=.75?'MUITO ALTO':p>=.55?'ALTO':p>=.35?'MODERADO':p>=.15?'BAIXO':'MUITO BAIXO';}
-function riskColor(rl){return rl==='MUITO ALTO'?'#b71c1c':rl==='ALTO'?'#e65100':rl==='MODERADO'?'#1565c0':rl==='BAIXO'?'#2e7d32':'#6b7280';}
-function barColor(p){return p>=.75?'#b71c1c':p>=.55?'#e65100':p>=.35?'#1565c0':'#2e7d32';}
+function riskColor(rl){return rl==='MUITO ALTO'?'#DC2626':rl==='ALTO'?'#F59E0B':rl==='MODERADO'?'#2563EB':rl==='BAIXO'?'#10B981':'#64748B';}
+function barColor(p){return p>=.75?'#DC2626':p>=.55?'#F59E0B':p>=.35?'#2563EB':'#10B981';}
 function notaLabel(n){return n===1?'Nota 1 — Leve':n===2?'Nota 2 — Moderado':'Nota 3 — Crítico';}
-function notaColor(n){return n===3?'#b71c1c':n===2?'#e65100':'#f57c00';}
-function riskBadgeStyle(r){return r==='MUITO ALTO'?'background:#ffebee;color:#b71c1c':r==='ALTO'?'background:#fff3e0;color:#e65100':r==='MODERADO'?'background:#e3f2fd;color:#1565c0':'background:#e8f5e9;color:#2e7d32';}
+function notaColor(n){return n===3?'#DC2626':n===2?'#EA580C':'#F59E0B';}
+function riskBadgeStyle(r){return r==='MUITO ALTO'?'background:#FEF2F2;color:#DC2626':r==='ALTO'?'background:#FFFBEB;color:#F59E0B':r==='MODERADO'?'background:#EFF6FF;color:#2563EB':'background:#ECFDF5;color:#10B981';}
 function v(id){var el=document.getElementById(id);return el?(el.value||'—'):'—';}
-
 function prazoMax(r){return r==='MUITO ALTO'?'3 meses':r==='ALTO'?'6 meses':'12 meses';}
-function prazoMaxDate(r){
-  var d=new Date();
-  if(r==='MUITO ALTO')d.setMonth(d.getMonth()+3);
-  else if(r==='ALTO')d.setMonth(d.getMonth()+6);
-  else d.setMonth(d.getMonth()+12);
-  return d.toISOString().split('T')[0];
-}
+function prazoMaxDate(r){var d=new Date();if(r==='MUITO ALTO')d.setMonth(d.getMonth()+3);else if(r==='ALTO')d.setMonth(d.getMonth()+6);else d.setMonth(d.getMonth()+12);return d.toISOString().split('T')[0];}
 function prazoMaxDateDisplay(r){return r==='MUITO ALTO'?'3 meses (90 dias)':r==='ALTO'?'6 meses':'12 meses';}
-function checkPrazoFora(dataStr,risco){
-  if(!dataStr)return false;
-  var limite=new Date(prazoMaxDate(risco));
-  var escolhida=new Date(dataStr);
-  return escolhida>limite;
-}
+function checkPrazoFora(dataStr,risco){if(!dataStr)return false;return new Date(dataStr)>new Date(prazoMaxDate(risco));}
 function showProgress(t){document.getElementById('progress-overlay').classList.add('show');document.getElementById('prog-title').textContent=t;setProgress(0,'Iniciando...');}
 function setProgress(p,s){document.getElementById('prog-bar').style.width=p+'%';document.getElementById('prog-pct').textContent=p+'%';document.getElementById('prog-step').textContent=s;}
 function hideProgress(){document.getElementById('progress-overlay').classList.remove('show');}
-function showEnvioFeedback(msg,ok){var fb=document.getElementById('envio-feedback');fb.style.display='block';fb.style.background=ok?'#e8f5e9':'#fff3e0';fb.style.color=ok?'#2e7d32':'#e65100';fb.textContent=msg;}
+function showEnvioFeedback(msg,ok){var fb=document.getElementById('envio-feedback');fb.style.display='block';fb.style.background=ok?'#ECFDF5':'#FFFBEB';fb.style.color=ok?'#065F46':'#92400E';fb.style.borderRadius='10px';fb.style.border=ok?'1px solid #6EE7B7':'1px solid #FDE68A';fb.textContent=msg;}
 
-// ── HISTORY ──────────────────────────────────────────────────
-function getHistory(){try{return JSON.parse(localStorage.getItem('pqi_history')||'[]');}catch(e){return[];}}
-function saveHistoryArr(arr){try{localStorage.setItem('pqi_history',JSON.stringify(arr));}catch(e){alert('Aviso: armazenamento cheio. Exclua inspeções antigas.');}}
-function saveInspection(){
-  var score=calcScore();
-  var rec={id:_currentInspId||Date.now().toString(),torre:v('id_torre'),concessao:v('concessao'),linha:v('linha'),data:v('data_inspecao'),insp1:v('inspetor1'),indice:Math.round(score.pctGeral*100),classificacao:riskLabel(score.pctGeral),status:'pendente',pdfName:window._pdfName||'',corpo:montarCorpoTexto(),timestamp:Date.now()};
-  var arr=getHistory();
-  var idx=arr.findIndex(function(r){return r.id===rec.id;});
-  if(idx>=0){arr[idx]=rec;}else{arr.unshift(rec);}
-  _currentInspId=rec.id;
-  saveHistoryArr(arr);
+// ══════════════════════════════════════════════════════════════
+// INDEXEDDB — Armazenamento offline de fotos e inspeções
+// ══════════════════════════════════════════════════════════════
+var atlasDB=null;
+const DB_NAME='atlas-db';
+const DB_VERSION=1;
+
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    if(atlasDB){resolve(atlasDB);return;}
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('inspections'))
+        db.createObjectStore('inspections',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('photos'))
+        db.createObjectStore('photos',{keyPath:'id'}).createIndex('inspId','inspectionId');
+    };
+    req.onsuccess=e=>{atlasDB=e.target.result;resolve(atlasDB);};
+    req.onerror=e=>reject(e);
+  });
+}
+
+async function dbPut(store,obj){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result);
+    tx.onerror=e=>rej(e);
+  });
+}
+async function dbGet(store,key){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result);
+  });
+}
+async function dbGetAll(store){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result);
+  });
+}
+async function dbDelete(store,key){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).delete(key).onsuccess=()=>res();
+  });
+}
+async function dbGetByIndex(store,indexName,value){
+  const db=await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    const idx=tx.objectStore(store).index(indexName);
+    idx.getAll(value).onsuccess=e=>res(e.target.result);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// FOTO CAPTURE + COMPRESSÃO
+// ══════════════════════════════════════════════════════════════
+function compressImage(file,maxPx,quality){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let w=img.width,h=img.height;
+      if(w>maxPx||h>maxPx){
+        if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}
+        else{w=Math.round(w*maxPx/h);h=maxPx;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(canvas.toDataURL('image/jpeg',quality));
+    };
+    img.src=url;
+  });
+}
+
+async function capFoto(id,field,idx,input){
+  const file=input.files[0];
+  if(!file)return;
+  // Mostrar loading
+  estado[id][field][idx]='loading';
+  renderItems(_itemSec[id]);
+  try{
+    // Comprime: 1200px max, 80% qualidade para armazenamento
+    const compressed=await compressImage(file,1200,0.80);
+    estado[id][field][idx]=compressed;
+    // Salva no IndexedDB com ID único
+    const photoId=_currentInspId+'_'+id+'_'+field+'_'+idx;
+    await dbPut('photos',{
+      id:photoId,
+      inspectionId:_currentInspId,
+      itemId:id,
+      field:field,
+      idx:idx,
+      dataUrl:compressed,
+      ts:Date.now()
+    });
+  }catch(e){
+    estado[id][field][idx]='';
+    alert('Erro ao processar foto. Tente novamente.');
+  }
+  renderItems(_itemSec[id]);
+}
+
+function remFoto(id,field,idx){
+  if(!estado[id][field])return;
+  estado[id][field][idx]='';
+  // Remove do IndexedDB
+  const photoId=_currentInspId+'_'+id+'_'+field+'_'+idx;
+  dbDelete('photos',photoId).catch(()=>{});
+  renderItems(_itemSec[id]);
+}
+
+function fotoSlotsHtml(id,field){
+  const arr=(estado[id]&&estado[id][field])?estado[id][field]:['','',''];
+  const isAfter=field==='fotosDepois';
+  let h='<div class="foto-grid">';
+  for(let i=0;i<3;i++){
+    const dat=arr[i]||'',fid='cam_'+id+'_'+field+'_'+i;
+    if(dat==='loading'){
+      h+='<div class="foto-loading">🔄</div>';
+    }else if(dat){
+      h+='<div class="foto-slot-img"><img src="'+dat+'" alt="foto"><button class="foto-del" onclick="remFoto(\''+id+'\',\''+field+'\','+i+')">✕</button></div>';
+    }else{
+      h+='<div><button class="foto-slot-add'+(isAfter?' foto-slot-add-green':'')+'" onclick="document.getElementById(\''+fid+'\').click()">';
+      h+='<span style="font-size:22px">📷</span>';
+      h+='<span>'+(isAfter?'Depois':'Foto')+(i>0?' '+(i+1):'')+'</span>';
+      h+='</button>';
+      h+='<input type="file" accept="image/*" capture="environment" id="'+fid+'" style="display:none" onchange="capFoto(\''+id+'\',\''+field+'\','+i+',this)"></div>';
+    }
+  }
+  return h+'</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// PERFIL DO INSPETOR
+// ══════════════════════════════════════════════════════════════
+function getProfile(){try{return JSON.parse(localStorage.getItem('atlas_profile')||'null');}catch(e){return null;}}
+function saveProfile(){
+  const p={nome:document.getElementById('p_nome').value.trim(),email:document.getElementById('p_email').value.trim(),empresa:document.getElementById('p_empresa').value.trim(),supervisor:document.getElementById('p_supervisor').value.trim()};
+  localStorage.setItem('atlas_profile',JSON.stringify(p));
+  closeProfile();
+  renderHeroProfile();
+  showToast('Perfil salvo! ✓');
+}
+function openProfile(){
+  const p=getProfile();
+  if(p){document.getElementById('p_nome').value=p.nome||'';document.getElementById('p_email').value=p.email||'';document.getElementById('p_empresa').value=p.empresa||'';document.getElementById('p_supervisor').value=p.supervisor||'';}
+  document.getElementById('modal-profile').classList.add('show');
+}
+function closeProfile(){document.getElementById('modal-profile').classList.remove('show');}
+function renderHeroProfile(){
+  const p=getProfile();
+  const heroInfo=document.getElementById('hero-profile-info');
+  if(p&&p.nome){
+    document.getElementById('hero-name').textContent=p.nome;
+    document.getElementById('hero-empresa').textContent=p.empresa||'HRZ Transmissoras';
+    heroInfo.style.display='block';
+  }else{heroInfo.style.display='none';}
+}
+function preencherPerfil(){
+  const p=getProfile();
+  if(!p)return;
+  if(p.nome&&!document.getElementById('inspetor1').value)document.getElementById('inspetor1').value=p.nome;
+  if(p.email&&!document.getElementById('email_inspetor').value)document.getElementById('email_inspetor').value=p.email;
+  if(p.empresa&&!document.getElementById('contratada').value)document.getElementById('contratada').value=p.empresa;
+  if(p.supervisor&&!document.getElementById('supervisor').value)document.getElementById('supervisor').value=p.supervisor;
+}
+
+// ══════════════════════════════════════════════════════════════
+// HISTÓRICO — IndexedDB
+// ══════════════════════════════════════════════════════════════
+async function saveInspection(){
+  const score=calcScore();
+  const allItens=Object.values(ITENS).flat();
+  const qtdSim=allItens.filter(it=>estado[it.id]&&estado[it.id].res==='sim').length;
+  const qtdNao=allItens.filter(it=>estado[it.id]&&estado[it.id].res==='nao').length;
+  const qtdNa=allItens.filter(it=>estado[it.id]&&estado[it.id].res==='na').length;
+  const qtdAchados=allItens.filter(it=>estado[it.id]&&estado[it.id].res==='sim'&&estado[it.id].nota).length;
+  const qtdAcoes=allItens.filter(it=>estado[it.id]&&estado[it.id].resolv==='nao').length;
+  // Snapshot do estado SEM dados de foto (fotos ficam no store 'photos')
+  const estadoLite={};
+  Object.entries(estado).forEach(([k,e])=>{if(e)estadoLite[k]={res:e.res,nota:e.nota,obs:e.obs,resolv:e.resolv,plano:e.plano};});
+  const bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+  const rec={
+    id:_currentInspId,
+    torre:v('id_torre'),concessao:v('concessao'),linha:v('linha'),circuito:v('circuito'),
+    data:v('data_inspecao'),hora_inicio:v('hora_inicio'),hora_fim:v('hora_fim'),
+    insp1:v('inspetor1'),email_inspetor:v('email_inspetor'),
+    insp2:v('inspetor2'),supervisor:v('supervisor'),contratada:v('contratada'),
+    lat:v('gps_lat'),lon:v('gps_lon'),meteo:v('meteo'),temp:v('temperatura'),
+    tipo:v('tipo_torre'),bioma,
+    vegetacao:document.getElementById('vegetacao_livre')?document.getElementById('vegetacao_livre').value:'',
+    obs_gerais:v('obs_gerais'),assina_nome:v('assina_nome'),
+    indice:Math.round(score.pctGeral*100),classificacao:riskLabel(score.pctGeral),
+    m1:Math.round((score.pcts.M1||0)*100),m2:Math.round((score.pcts.M2||0)*100),
+    m3:Math.round((score.pcts.M3||0)*100),m4:Math.round((score.pcts.M4||0)*100),
+    m5:Math.round((score.pcts.M5||0)*100),
+    qtd_total:allItens.length,qtd_sim:qtdSim,qtd_nao:qtdNao,qtd_na:qtdNa,
+    qtd_achados:qtdAchados,qtd_acoes:qtdAcoes,
+    tem_achado:qtdAchados>0?'Sim':'Não',tem_acao:qtdAcoes>0?'Sim':'Não',
+    estadoLite,
+    status:'pendente',timestamp:Date.now(),
+    pdfBase64:window._pdfBase64||null,pdfName:window._pdfName||''
+  };
+  await dbPut('inspections',rec);
   return rec;
 }
-function markSent(id){saveHistoryArr(getHistory().map(function(r){return r.id===id?Object.assign({},r,{status:'enviado'}):r;}));}
-function deleteInsp(id){if(!confirm('Excluir esta inspeção do histórico?'))return;saveHistoryArr(getHistory().filter(function(r){return r.id!==id;}));renderDashboard();}
-
-// ── DASHBOARD ─────────────────────────────────────────────────
-function renderDashboard(){
-  var hist=getHistory();
-  var total=hist.length,enviadas=hist.filter(function(r){return r.status==='enviado';}).length;
-  var pendentes=total-enviadas,avgIdx=total>0?Math.round(hist.reduce(function(a,r){return a+r.indice;},0)/total):0;
-  var el=document.getElementById('dash-content');
-  if(!total){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma inspeção ainda</div><div class="empty-sub">Clique em "+ Nova inspeção" para começar.<br>Após gerar o PDF, a inspeção aparece aqui.</div></div>';return;}
-  var h='<div class="dash-metric-grid">';
-  h+='<div class="dash-metric"><div class="dash-metric-label">Total</div><div class="dash-metric-value" style="color:#0E2750">'+total+'</div></div>';
-  h+='<div class="dash-metric"><div class="dash-metric-label">Enviadas</div><div class="dash-metric-value" style="color:#2e7d32">'+enviadas+'</div></div>';
-  h+='<div class="dash-metric"><div class="dash-metric-label">Pendentes</div><div class="dash-metric-value" style="color:'+(pendentes>0?'#e65100':'#6b7280')+'">'+pendentes+'</div></div>';
-  h+='<div class="dash-metric"><div class="dash-metric-label">Índice médio</div><div class="dash-metric-value" style="color:'+barColor(avgIdx/100)+'">'+avgIdx+'%</div></div>';
-  h+='</div>';
-  // Mini chart
-  h+='<div class="card" style="margin-bottom:14px;"><div class="card-title" style="margin-bottom:10px;">Últimas inspeções</div>';
-  hist.slice(0,6).reverse().forEach(function(r){
-    var c=barColor(r.indice/100),w=Math.max(r.indice,3);
-    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">';
-    h+='<div style="font-size:11px;color:var(--muted);width:60px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.torre+'</div>';
-    h+='<div style="flex:1;height:14px;background:#f0f0f0;border-radius:7px;overflow:hidden;position:relative;"><div style="position:absolute;left:0;top:0;height:100%;width:'+w+'%;background:'+c+';border-radius:7px;"></div></div>';
-    h+='<div style="font-size:11px;font-weight:700;color:'+c+';width:32px;text-align:right">'+r.indice+'%</div>';
-    h+='<div style="font-size:9px;width:14px;height:14px;border-radius:50%;background:'+(r.status==='enviado'?'#e8f5e9':'#fff3e0')+';display:flex;align-items:center;justify-content:center;color:'+(r.status==='enviado'?'#2e7d32':'#e65100')+';flex-shrink:0">'+(r.status==='enviado'?'✓':'!')+'</div>';
-    h+='</div>';
-  });
-  h+='</div>';
-  // Cards
-  hist.forEach(function(r){
-    var rl=r.classificacao||riskLabel(r.indice/100),rc=riskColor(rl),isPend=r.status==='pendente';
-    h+='<div class="insp-card '+(isPend?'pendente':'enviado')+'">';
-    h+='<div class="insp-card-head">';
-    h+='<div class="insp-card-row1"><div class="insp-torre">Torre '+r.torre+'</div><div class="insp-idx" style="color:'+rc+'">'+r.indice+'%</div></div>';
-    h+='<div class="insp-meta">'+r.concessao+' · '+r.linha+' · '+r.data+(r.insp1&&r.insp1!=='—'?' · '+r.insp1:'')+'</div>';
-    h+='<div style="display:flex;align-items:center;gap:8px;">';
-    h+='<span class="insp-status '+(isPend?'pendente':'enviado')+'">'+(isPend?'⚠ Pendente':'✓ Enviado')+'</span>';
-    h+='<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;'+riskBadgeStyle(rl)+'">'+rl+'</span>';
-    h+='</div></div>';
-    h+='<div class="insp-actions">';
-    if(isPend){
-      h+='<button class="insp-btn" style="color:#0078d4;font-weight:700;" onclick="sincronizarHist(\''+r.id+'\')">☁️ Sync</button>';
-      h+='<button class="insp-btn" style="color:var(--mod)" onclick="resendEmail(\''+r.id+'\')">📧 E-mail</button>';
-    }else{
-      h+='<button class="insp-btn" style="color:#9ca3af;" disabled>✓ Sync</button>';
-    }
-    h+='<button class="insp-btn" style="color:var(--mod)" onclick="verRelatorio(\''+r.id+'\')">📋 Ver</button>';
-    h+='<button class="insp-btn" style="color:var(--navy)" onclick="baixarPDFhist(\''+r.id+'\')">⬇ PDF</button>';
-    h+='<button class="insp-btn" style="color:#b71c1c" onclick="deleteInsp(\''+r.id+'\')">🗑</button>';
-    h+='</div></div>';
-  });
-  el.innerHTML=h;
+async function getHistory(){return await dbGetAll('inspections');}
+async function markSent(id){
+  const rec=await dbGet('inspections',id);
+  if(rec){rec.status='enviado';await dbPut('inspections',rec);}
+}
+async function deleteInsp(id){
+  if(!confirm('Excluir esta inspeção?'))return;
+  await dbDelete('inspections',id);
+  // Remove fotos associadas
+  const photos=await dbGetByIndex('photos','inspId',id);
+  for(const p of photos)await dbDelete('photos',p.id);
+  renderDashboard();
 }
 
-function verRelatorio(id){
-  var rec=getHistory().find(function(r){return r.id===id;});
-  if(!rec)return;
-  // Se for a inspeção atual na sessão, mostra o relatório visual completo
-  if(window._currentInspId===id||_currentInspId===id){
-    goTo(8);
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════
+async function renderDashboard(){
+  const hist=(await getHistory()).sort((a,b)=>b.timestamp-a.timestamp);
+  const total=hist.length,enviadas=hist.filter(r=>r.status==='enviado').length;
+  const pendentes=total-enviadas;
+  const avgIdx=total>0?Math.round(hist.reduce((a,r)=>a+r.indice,0)/total):0;
+
+  // Métricas
+  const metrics=document.getElementById('dash-metrics');
+  metrics.innerHTML=`
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-value" style="color:var(--navy)">${total}</div><div class="metric-sub">inspeções</div></div>
+    <div class="metric"><div class="metric-label">Enviadas</div><div class="metric-value" style="color:var(--green)">${enviadas}</div><div class="metric-sub">sincronizadas</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-value" style="color:${pendentes>0?'var(--orange)':'var(--muted)'}">${pendentes}</div><div class="metric-sub">aguardando sync</div></div>
+    <div class="metric"><div class="metric-label">Índice médio</div><div class="metric-value" style="color:${barColor(avgIdx/100)}">${avgIdx}%</div><div class="metric-sub">exposição</div></div>
+  `;
+
+  // Mini chart
+  const miniChart=document.getElementById('dash-mini-chart');
+  if(hist.length>0){
+    let ch='<div class="card" style="margin-bottom:14px;"><div class="card-title"><span class="card-title-icon">📊</span>Últimas inspeções</div>';
+    hist.slice(0,6).reverse().forEach(r=>{
+      const c=barColor(r.indice/100),w=Math.max(r.indice,2);
+      const isPend=r.status==='pendente';
+      ch+=`<div class="mini-chart-item">
+        <div class="mini-chart-label">${r.torre}</div>
+        <div class="mini-chart-bar-wrap"><div class="mini-chart-bar" style="width:${w}%;background:${c}"></div></div>
+        <div class="mini-chart-pct" style="color:${c}">${r.indice}%</div>
+        <div class="mini-chart-status" style="background:${isPend?'var(--orange-bg)':'var(--green-bg)'}">
+          <span style="color:${isPend?'var(--orange)':'var(--green)'}">${isPend?'!':'✓'}</span>
+        </div>
+      </div>`;
+    });
+    ch+='</div>';
+    miniChart.innerHTML=ch;
+  }else{miniChart.innerHTML='';}
+
+  // Cards
+  const insp=document.getElementById('dash-inspections');
+  if(!total){
+    insp.innerHTML='<div class="empty-state"><div class="empty-icon">🏗️</div><div class="empty-title">Nenhuma inspeção ainda</div><div class="empty-sub">Toque em "+ Nova inspeção" para começar.<br>O ATLAS funciona 100% offline.</div></div>';
     return;
   }
-  // Caso contrário abre o corpo texto em nova aba
-  var w=window.open('','_blank');
-  w.document.write('<html><head><meta charset="UTF-8"><title>'+rec.torre+'</title><style>body{font-family:sans-serif;padding:20px;max-width:700px;margin:0 auto;font-size:13px;line-height:1.6;white-space:pre-wrap;}</style></head><body>'+rec.corpo+'</body></html>');
-  w.document.close();
+  let h='';
+  hist.forEach(r=>{
+    const rl=r.classificacao||riskLabel(r.indice/100),rc=riskColor(rl),isPend=r.status==='pendente';
+    h+=`<div class="insp-card ${isPend?'pendente':'enviado'}">
+      <div class="insp-card-head">
+        <div class="insp-row1"><div class="insp-torre">Torre ${r.torre}</div><div class="insp-idx" style="color:${rc}">${r.indice}%</div></div>
+        <div class="insp-meta">${r.concessao} · ${r.linha} · ${r.data}${r.insp1&&r.insp1!=='—'?' · '+r.insp1:''}</div>
+        <div class="insp-tags">
+          <span class="insp-status ${isPend?'pendente':'enviado'}">${isPend?'⚠ Pendente':'✓ Sincronizado'}</span>
+          <span class="badge" style="${riskBadgeStyle(rl)}">${rl}</span>
+        </div>
+      </div>
+      <div class="insp-actions">
+        ${isPend?`<button class="insp-btn" style="color:#25D366" onclick="resendWA('${r.id}')">💬 WA</button>`:''}
+        ${isPend?`<button class="insp-btn" style="color:#0078d4" onclick="syncOne('${r.id}')">☁️ Sync</button>`:''}
+        <button class="insp-btn" style="color:var(--mod)" onclick="verRelatorio('${r.id}')">📋 Ver</button>
+        <button class="insp-btn" style="color:var(--navy)" onclick="baixarPDFhist('${r.id}')">⬇ PDF</button>
+        <button class="insp-btn" style="color:var(--red)" onclick="deleteInsp('${r.id}')">🗑</button>
+      </div>
+    </div>`;
+  });
+  insp.innerHTML=h;
 }
 
-function baixarPDFhist(id){
-  if(window._pdfBase64&&window._currentInspId===id){
-    var rec=getHistory().find(function(r){return r.id===id;});
-    var nome=(rec&&rec.pdfName)||'relatorio.pdf';
-    var a=document.createElement('a');
-    a.href='data:application/pdf;base64,'+window._pdfBase64;
-    a.download=nome;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }else{
-    alert('O PDF só pode ser baixado novamente na mesma sessão em que foi gerado.\n\nPara gerar novamente, abra o relatório e clique em "Finalizar e Sincronizar".');
-  }
-}
-
-function resendWA(id){
-  var rec=getHistory().find(function(r){return r.id===id;});
-  if(!rec)return;
-  var msg=montarMsgWA(rec);
-  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
-  markSent(id);
-  setTimeout(renderDashboard,800);
-}
-
-function resendEmail(id){
-  var rec=getHistory().find(function(r){return r.id===id;});
-  if(!rec)return;
-  var subj=encodeURIComponent('PQI Climate_'+rec.torre+'_'+rec.data+' — '+rec.indice+'% '+rec.classificacao);
-  var nota='[ANEXAR O PDF: '+(rec.pdfName||'arquivo PDF da inspeção')+']\n\n';
-  window.location.href='mailto:'+encodeURIComponent(EMAIL_FIXO)+'?subject='+subj+'&body='+encodeURIComponent(nota+rec.corpo);
-  markSent(id);
-  setTimeout(renderDashboard,800);
-}
-
-function montarMsgWA(rec){
-  if(rec){
-    return '🏗️ *AUDITORIA PQI CLIMATE — HRZ*\n─────────────────────────────\n📍 *Torre:* '+rec.torre+'\n📅 *Data:* '+rec.data+'\n👷 *Inspetor:* '+rec.insp1+'\n─────────────────────────────\n📊 *ÍNDICE: '+rec.indice+'% — '+rec.classificacao+'*\n\n_PDF enviado em anexo — PQI Climate · HRZ_';
-  }
-  var score=calcScore(),torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao'),linha=v('linha'),insp1=v('inspetor1'),superv=v('supervisor');
-  var bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
-  var rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
-  var msg='🏗️ *AUDITORIA PQI CLIMATE — HRZ*\n─────────────────────────────\n';
-  msg+='📍 *Torre:* '+torre+'\n🔌 *Concessão:* '+conc+' · '+linha+'\n📅 *Data:* '+data+'\n👷 *Inspetor:* '+insp1+'\n🔰 *Supervisor:* '+superv+'\n';
-  if(bioma)msg+='🌿 *Bioma:* '+bioma+'\n';
-  msg+='─────────────────────────────\n📊 *ÍNDICE GERAL: '+pctG+'% — '+rl+'*\n\n*Módulos:*\n';
-  Object.keys(MAX_MOD).forEach(function(mod){var p=Math.round((score.pcts[mod]||0)*100),r=riskLabel(score.pcts[mod]||0);var bar='█'.repeat(Math.round(p/10))+'░'.repeat(10-Math.round(p/10));msg+=MOD_NAMES[mod].split('—')[0].trim()+' '+bar+' '+p+'% '+r+'\n';});
-  var pendentes=score.criticos.filter(function(c){return c.est.resolv==='nao';});
-  var resolvidos=score.criticos.filter(function(c){return c.est.resolv==='sim';});
-  if(score.criticos.length>0){msg+='\n⚠️ *'+score.criticos.length+' anomalia(s)*';if(resolvidos.length>0)msg+=' | ✓ '+resolvidos.length+' resolvida(s)';if(pendentes.length>0)msg+=' | 📋 '+pendentes.length+' com plano';msg+='\n';}
-  msg+='─────────────────────────────\n📎 *PDF com fotos e detalhes enviado em anexo.*\n_PQI Climate · HRZ Transmissoras_';
-  return msg;
-}
-
-// ── NAVEGAÇÃO ─────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════════════════════════
 function goTo(n){
-  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
-  var isHome=n==='home';
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const isHome=n==='home';
   document.getElementById(isHome?'s-home':'s'+n).classList.add('active');
   window.scrollTo(0,0);
   document.getElementById('btn-home-back').style.display=isHome?'none':'block';
+  document.getElementById('btn-profile').style.display=isHome?'flex':'none';
   if(isHome){
-    document.getElementById('header-sub').textContent='Minhas Inspeções';
+    document.getElementById('header-sub').textContent='HRZ Transmissoras';
     document.getElementById('header-step').textContent='';
     document.getElementById('progress').style.width='0%';
     renderDashboard();
   }else{
-    var subs=['Identificação','Via de Acesso','Praça e Base','Aterramento e Drenagem','Estrutura e Cabos','Raios','Incêndio','Histórico e Manutenção','Resultado'];
-    var ni=parseInt(n);
-    document.getElementById('header-sub').textContent=subs[ni]||'Auditoria';
-    document.getElementById('header-step').textContent=(ni+1)+' / 9';
+    const subs=['Identificação','Via de Acesso','Praça e Base','Aterramento','Estrutura e Cabos','Raios','Incêndio','Histórico','Resultado'];
+    const ni=parseInt(n);
+    document.getElementById('header-sub').textContent=subs[ni]||'Clima';
+    document.getElementById('header-step').textContent=(ni+1)+'/9';
     document.getElementById('progress').style.width=Math.round((ni+1)/9*100)+'%';
-    var sk=['','s1','s2','s3','s4','s5','s6','s7'];
+    const sk=['','s1','s2','s3','s4','s5','s6','s7'];
     if(ni>=1&&ni<=7)renderItems(sk[ni]);
   }
 }
 
 function iniciarNovaInspecao(){
-  estado={};_itemSec={};_pdfGenerated=false;_sendDone=false;_currentInspId=null;
+  estado={};_itemSec={};_pdfGenerated=false;_currentInspId=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   window._pdfBase64=null;window._pdfName=null;
-  document.querySelectorAll('#s0 input,#s0 select,#s0 textarea').forEach(function(el){el.value='';});
-  ['obs_gerais','hora_fim','assina_nome','assina_conf'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  var fb=document.getElementById('envio-feedback');if(fb)fb.style.display='none';
-  var ap=document.getElementById('acoes-pos-pdf');if(ap)ap.style.display='none';
-  var bg=document.getElementById('btn-gerar-pdf');if(bg){bg.textContent='📋 Finalizar e Sincronizar';bg.style.background='#0E2750';bg.disabled=false;}
+  // Limpa campos
+  document.querySelectorAll('#s0 input,#s0 select,#s0 textarea').forEach(el=>el.value='');
+  ['obs_gerais','hora_fim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('envio-feedback').style.display='none';
+  document.getElementById('acoes-pos-pdf').style.display='none';
+  const bg=document.getElementById('btn-gerar-pdf');if(bg){bg.textContent='📄 Gerar PDF';bg.style.background='var(--navy)';bg.disabled=false;}
+  // Data/hora automáticos
   document.getElementById('data_inspecao').valueAsDate=new Date();
-  var now=new Date();
+  const now=new Date();
   document.getElementById('hora_inicio').value=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  // Pré-preenche perfil
+  preencherPerfil();
   goTo(0);
 }
 
-function captureGPS(){if(!navigator.geolocation){alert('GPS não disponível.');return;}navigator.geolocation.getCurrentPosition(function(p){document.getElementById('gps_lat').value=p.coords.latitude.toFixed(6);document.getElementById('gps_lon').value=p.coords.longitude.toFixed(6);},function(){alert('Não foi possível capturar o GPS.');});}
-function atualizarLinhas(){var c=document.getElementById('concessao').value,s=document.getElementById('linha');s.innerHTML='';if(!c){s.innerHTML='<option value="">— selecione a concessão primeiro —</option>';return;}s.innerHTML='<option value="">Selecione a linha</option>';(LINHAS[c]||[]).forEach(function(l){var o=document.createElement('option');o.value=l;o.textContent=l;s.appendChild(o);});}
-function atualizarRiscoBioma(){var bioma=document.getElementById('bioma_select').value,block=document.getElementById('bioma-risco-block');if(!bioma){block.style.display='none';return;}var r=BIOMA_RISCO_INFO[bioma];if(!r){block.style.display='none';return;}block.style.display='block';var badge=document.getElementById('bioma-risco-badge');badge.textContent='Risco de queimada: '+r.nivel;badge.style.background=r.bg;badge.style.color=r.cor;document.getElementById('bioma-risco-desc').textContent=r.desc;}
-
-// ── FOTOS ─────────────────────────────────────────────────────
-function fotoSlotsHtml(id,field){
-  var arr=(estado[id]&&estado[id][field])?estado[id][field]:['','',''];
-  var label=field==='fotosDepois'?'Depois':'Foto';
-  var h='<div class="foto-grid">';
-  for(var i=0;i<3;i++){
-    var dat=arr[i]||'',fid='cam_'+id+'_'+field+'_'+i;
-    if(dat){h+='<div class="foto-slot-img"><img src="'+dat+'"><button class="foto-del" onclick="remFoto(\''+id+'\',\''+field+'\','+i+')">✕</button></div>';}
-    else{h+='<div><button class="foto-slot-add" onclick="document.getElementById(\''+fid+'\').click()"><span style="font-size:20px">📷</span><span>'+label+(i>0?' '+(i+1):'')+'</span></button><input type="file" accept="image/*" capture="environment" id="'+fid+'" style="display:none" onchange="capFoto(\''+id+'\',\''+field+'\','+i+',this)"></div>';}
-  }
-  return h+'</div>';
+function captureGPS(){
+  if(!navigator.geolocation){alert('GPS não disponível.');return;}
+  navigator.geolocation.getCurrentPosition(p=>{
+    document.getElementById('gps_lat').value=p.coords.latitude.toFixed(6);
+    document.getElementById('gps_lon').value=p.coords.longitude.toFixed(6);
+  },()=>alert('Não foi possível capturar o GPS.'),{enableHighAccuracy:true,timeout:10000});
 }
-function capFoto(id,field,idx,input){
-  var file=input.files[0];if(!file)return;
-  var r=new FileReader();
-  r.onload=function(e){
-    var img=new Image();
-    img.onload=function(){
-      var maxW=800,maxH=800,w=img.width,h=img.height;
-      if(w>maxW||h>maxH){var ratio=Math.min(maxW/w,maxH/h);w=Math.round(w*ratio);h=Math.round(h*ratio);}
-      var canvas=document.createElement('canvas');
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      var compressed=canvas.toDataURL('image/jpeg',0.70);
-      if(!estado[id][field])estado[id][field]=['','',''];
-      estado[id][field][idx]=compressed;
-      renderItems(_itemSec[id]);
-    };
-    img.src=e.target.result;
-  };
-  r.readAsDataURL(file);
-}
-function remFoto(id,field,idx){if(!estado[id][field])return;estado[id][field][idx]='';renderItems(_itemSec[id]);}
 
-// ── RENDER ITEMS ──────────────────────────────────────────────
-function initEst(id){if(!estado[id])estado[id]={res:null,nota:null,obs:'',fotos:['','',''],resolv:null,acaoImediata:'',fotosDepois:['','',''],plano:{acao:'',respOrg:'',respNome:'',email:'',prazoData:''}};}
+function atualizarLinhas(){
+  const c=document.getElementById('concessao').value,s=document.getElementById('linha');
+  s.innerHTML='';
+  if(!c){s.innerHTML='<option value="">— selecione a concessão primeiro —</option>';return;}
+  s.innerHTML='<option value="">Selecione a linha</option>';
+  (LINHAS[c]||[]).forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;s.appendChild(o);});
+}
+
+function atualizarRiscoBioma(){
+  const bioma=document.getElementById('bioma_select').value,block=document.getElementById('bioma-risco-block');
+  if(!bioma){block.style.display='none';return;}
+  const r=BIOMA_RISCO_INFO[bioma];if(!r){block.style.display='none';return;}
+  block.style.display='block';
+  const badge=document.getElementById('bioma-risco-badge');
+  badge.textContent='Risco de queimada: '+r.nivel;badge.style.background=r.bg;badge.style.color=r.cor;
+  document.getElementById('bioma-risco-desc').textContent=r.desc;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER ITEMS (checklist)
+// ══════════════════════════════════════════════════════════════
+function initEst(id){
+  if(!estado[id])estado[id]={res:null,nota:null,obs:'',fotos:['','',''],resolv:null,acaoImediata:'',fotosDepois:['','',''],plano:{acao:'',respOrg:'',respNome:'',email:'',prazoData:''}};
+}
 
 function renderItems(secKey){
-  var container=document.getElementById('items-'+secKey);
+  const container=document.getElementById('items-'+secKey);
   if(!container)return;
   container.innerHTML='';
-  ITENS[secKey].forEach(function(item){
+  ITENS[secKey].forEach(item=>{
     _itemSec[item.id]=secKey;
     initEst(item.id);
-    var est=estado[item.id];
-    var div=document.createElement('div');
+    const est=estado[item.id];
+    const div=document.createElement('div');
     div.className='check-item'+(est.res?' filled-'+est.res:'');
     div.id='ci-'+item.id;
-    var rc='risco-'+item.risco.replace(' ','-');
-    var mn=MOD_NAMES[item.mod]?MOD_NAMES[item.mod].split('—')[0].trim():item.mod;
-    var notaHtml='';
+    const rc='risco-'+item.risco.replace(' ','-');
+    const mn=MOD_NAMES[item.mod]?MOD_NAMES[item.mod].split('—')[0].trim():item.mod;
+    let notaHtml='';
     if(est.res==='sim'){
-      notaHtml+='<div class="nota-label">Gravidade:</div><div class="nota-btns">';
-      ['Leve','Moderado','Crítico'].forEach(function(lbl,i){var ni=i+1;notaHtml+='<button class="btn-nota n'+ni+(est.nota===ni?' active':'')+'" onclick="setNota(\''+item.id+'\','+ni+',\''+secKey+'\')">'+ni+'<br><span style="font-size:10px;font-weight:400">'+lbl+'</span></button>';});
-      notaHtml+='</div><div class="nota-desc" id="nd-'+item.id+'">'+(est.nota?notaDesc(est.nota):'Selecione a gravidade acima')+'</div>';
-      notaHtml+='<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;">Observações:</div>';
-      notaHtml+='<textarea class="obs-input" placeholder="Descreva o achado..." onchange="setObs(\''+item.id+'\',this.value)">'+est.obs+'</textarea>';
-      notaHtml+='<div style="font-size:11px;font-weight:600;color:var(--muted);margin-top:8px;margin-bottom:4px;">Fotos de evidência (até 3):</div>';
-      notaHtml+=fotoSlotsHtml(item.id,'fotos');
-      notaHtml+='<div class="resolv-sep"><div class="resolv-q">Este desvio foi resolvido na hora?</div>';
-      notaHtml+='<div class="btn-group"><button class="btn-res'+(est.resolv==='sim'?' active-nao':'')+'" onclick="setResolv(\''+item.id+'\',\'sim\')">✓ Sim, resolvido</button>';
-      notaHtml+='<button class="btn-res'+(est.resolv==='nao'?' active-sim':'')+'" onclick="setResolv(\''+item.id+'\',\'nao\')">✗ Não — plano de ação</button></div>';
+      notaHtml+='<div class="nota-label">Gravidade do desvio:</div><div class="nota-btns">';
+      ['Leve','Moderado','Crítico'].forEach((lbl,i)=>{const ni=i+1;notaHtml+=`<button class="btn-nota n${ni}${est.nota===ni?' active':''}" onclick="setNota('${item.id}',${ni},'${secKey}')">${ni}<br><span style="font-size:10px;font-weight:400">${lbl}</span></button>`;});
+      notaHtml+=`</div><div class="nota-desc" id="nd-${item.id}">${est.nota?notaDesc(est.nota):'Selecione a gravidade acima'}</div>`;
+      notaHtml+=`<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;margin-top:2px;">Observações:</div>`;
+      notaHtml+=`<textarea class="obs-input" placeholder="Descreva o achado..." onchange="setObs('${item.id}',this.value)">${est.obs}</textarea>`;
+      notaHtml+=`<div class="foto-section"><div class="foto-section-label">📷 Fotos de evidência (até 3)</div>${fotoSlotsHtml(item.id,'fotos')}</div>`;
+      notaHtml+=`<div class="resolv-sep"><div class="resolv-q">Este desvio foi resolvido na hora?</div>`;
+      notaHtml+=`<div class="btn-group"><button class="btn-res${est.resolv==='sim'?' active-nao':''}" onclick="setResolv('${item.id}','sim')">✓ Sim, resolvido</button><button class="btn-res${est.resolv==='nao'?' active-sim':''}" onclick="setResolv('${item.id}','nao')">✗ Não — plano de ação</button></div>`;
       if(est.resolv==='sim'){
-        notaHtml+='<div class="resolv-sim-block"><div class="resolv-sim-title">✓ RESOLVIDO NA HORA</div>';
-        notaHtml+='<textarea class="obs-input" style="border-color:#81c784;background:#fff;" placeholder="O que foi feito?" onchange="setAcaoImediata(\''+item.id+'\',this.value)">'+est.acaoImediata+'</textarea>';
-        notaHtml+='<div style="font-size:11px;font-weight:600;color:#2e7d32;margin-top:6px;margin-bottom:4px;">Fotos depois (até 3):</div>';
-        notaHtml+=fotoSlotsHtml(item.id,'fotosDepois');
-        notaHtml+='</div>';
+        notaHtml+=`<div class="resolv-sim-block"><div class="resolv-sim-title">✓ RESOLVIDO NA HORA</div><textarea class="obs-input" style="border-color:#6EE7B7;background:#fff;" placeholder="O que foi feito?" onchange="setAcaoImediata('${item.id}',this.value)">${est.acaoImediata}</textarea><div class="foto-section"><div class="foto-section-label" style="color:var(--green)">📷 Fotos depois (até 3)</div>${fotoSlotsHtml(item.id,'fotosDepois')}</div></div>`;
       }
       if(est.resolv==='nao'){
-        var pl=est.plano||{};
-        var prazoFora=pl.prazoData?checkPrazoFora(pl.prazoData,item.risco):false;
-        notaHtml+='<div class="plano-block"><div class="plano-title">PLANO DE AÇÃO — prazo máximo: '+prazoMaxDateDisplay(item.risco)+'</div>';
-        notaHtml+='<textarea class="plano-textarea" placeholder="Ação a executar *" onchange="setPlano(\''+item.id+'\',\'acao\',this.value)">'+(pl.acao||'')+'</textarea>';
-        notaHtml+='<div style="font-size:11px;font-weight:600;color:#1565c0;margin-bottom:5px;">Responsável *</div>';
-        notaHtml+='<select class="plano-select" onchange="setPlano(\''+item.id+'\',\'respOrg\',this.value)">';
-        notaHtml+='<option value="">Selecione a empresa</option>';
-        ['HRZ','Cymi','Outros'].forEach(function(org){notaHtml+='<option value="'+org+'"'+(pl.respOrg===org?' selected':'')+'>'+org+'</option>';});
-        notaHtml+='</select>';
-        notaHtml+='<input class="plano-input" type="text" placeholder="Nome do responsável *" value="'+(pl.respNome||'')+'" onchange="setPlano(\''+item.id+'\',\'respNome\',this.value)">';
-        notaHtml+='<input class="plano-input" type="email" placeholder="E-mail do responsável (opcional)" value="'+(pl.email||'')+'" onchange="setPlano(\''+item.id+'\',\'email\',this.value)">';
-        notaHtml+='<div style="font-size:11px;font-weight:600;color:#1565c0;margin-bottom:4px;">Prazo para conclusão *</div>';
-        notaHtml+='<input class="plano-input" type="date" id="prazo-'+item.id+'" value="'+(pl.prazoData||'')+'" max="'+prazoMaxDate(item.risco)+'" onchange="setPrazoData(\''+item.id+'\',\''+item.risco+'\',this.value,\''+item.id+'\')" style="margin-bottom:4px;'+(prazoFora?'border-color:#b71c1c;':'')+'"> ';
-        notaHtml+='<div id="prazo-warn-'+item.id+'" style="font-size:11px;margin-bottom:6px;color:'+(prazoFora?'#b71c1c':'#1565c0')+';font-weight:600;">'+(prazoFora?'⚠ Fora do limite! Máximo: '+prazoMax(item.risco)+' ('+prazoMaxDate(item.risco)+')'  :'Limite máximo: '+prazoMax(item.risco)+' ('+prazoMaxDate(item.risco)+')')+'</div>';
-        notaHtml+='</div>';
+        notaHtml+=`<div class="plano-block">
+          <div class="plano-title">📋 AGUARDA PLANO DE AÇÃO</div>
+          <div style="font-size:12px;color:var(--mod);line-height:1.5;margin-bottom:8px;">Este item será incluído na lista de ações corretivas enviada à equipe HRZ. O plano (responsável, prazo e ação) será definido após a inspeção.</div>
+          <div style="font-size:11px;font-weight:700;color:var(--mod);margin-bottom:4px;">Contexto adicional (opcional):</div>
+          <textarea class="plano-textarea" placeholder="Ex: material necessário, acesso difícil, urgência observada..." onchange="setPlano('${item.id}','contexto',this.value)">${(est.plano&&est.plano.contexto)||''}</textarea>
+        </div>`;
       }
       notaHtml+='</div>';
     }
-    div.innerHTML='<div class="check-main"><div class="check-risco '+rc+'">'+item.risco+' · Peso '+item.peso+' · '+mn+'</div><div class="check-q">'+item.q+'</div>'+(item.hint?'<div class="check-hint">'+item.hint+'</div>':'')+'<div class="btn-group"><button class="btn-res'+(est.res==='sim'?' active-sim':'')+'" onclick="setRes(\''+item.id+'\',\'sim\',\''+secKey+'\')">Sim</button><button class="btn-res'+(est.res==='nao'?' active-nao':'')+'" onclick="setRes(\''+item.id+'\',\'nao\',\''+secKey+'\')">Não</button><button class="btn-res'+(est.res==='na'?' active-na':'')+'" onclick="setRes(\''+item.id+'\',\'na\',\''+secKey+'\')">N/A</button></div></div><div class="nota-block'+(est.res==='sim'?' show':'')+'" id="nb-'+item.id+'">'+notaHtml+'</div>';
+    div.innerHTML=`<div class="check-main"><div class="check-risco ${rc}">${item.risco} · Peso ${item.peso} · ${mn}</div><div class="check-q">${item.q}</div>${item.hint?'<div class="check-hint">'+item.hint+'</div>':''}<div class="btn-group"><button class="btn-res${est.res==='sim'?' active-sim':''}" onclick="setRes('${item.id}','sim','${secKey}')">Sim</button><button class="btn-res${est.res==='nao'?' active-nao':''}" onclick="setRes('${item.id}','nao','${secKey}')">Não</button><button class="btn-res${est.res==='na'?' active-na':''}" onclick="setRes('${item.id}','na','${secKey}')">N/A</button></div></div><div class="nota-block${est.res==='sim'?' show':''}" id="nb-${item.id}">${notaHtml}</div>`;
     container.appendChild(div);
   });
 }
 
 function setRes(id,res,sk){estado[id].res=res;if(res!=='sim'){estado[id].nota=null;estado[id].resolv=null;}renderItems(sk);}
-function setNota(id,nota,sk){estado[id].nota=nota;var nd=document.getElementById('nd-'+id);if(nd)nd.textContent=notaDesc(nota);document.getElementById('nb-'+id).querySelectorAll('.btn-nota').forEach(function(b,i){b.classList.toggle('active',i+1===nota);});}
+function setNota(id,nota,sk){estado[id].nota=nota;const nd=document.getElementById('nd-'+id);if(nd)nd.textContent=notaDesc(nota);document.getElementById('nb-'+id).querySelectorAll('.btn-nota').forEach((b,i)=>b.classList.toggle('active',i+1===nota));}
 function setObs(id,val){estado[id].obs=val;}
 function setAcaoImediata(id,val){estado[id].acaoImediata=val;}
 function setPlano(id,field,val){if(!estado[id].plano)estado[id].plano={};estado[id].plano[field]=val;}
 function setPrazoData(id,risco,val,itemId){
   if(!estado[id].plano)estado[id].plano={};
   estado[id].plano.prazoData=val;
-  var fora=checkPrazoFora(val,risco);
-  var inp=document.getElementById('prazo-'+itemId);
-  var warn=document.getElementById('prazo-warn-'+itemId);
-  if(inp)inp.style.borderColor=fora?'#b71c1c':'#90caf9';
-  if(warn){
-    warn.style.color=fora?'#b71c1c':'#1565c0';
-    warn.textContent=fora?'⚠ Fora do limite! Máximo: '+prazoMax(risco)+' ('+prazoMaxDate(risco)+')':'Limite máximo: '+prazoMax(risco)+' ('+prazoMaxDate(risco)+')';
-  }
+  const fora=checkPrazoFora(val,risco);
+  const inp=document.getElementById('prazo-'+itemId),warn=document.getElementById('prazo-warn-'+itemId);
+  if(inp)inp.style.borderColor=fora?'var(--red)':'#BFDBFE';
+  if(warn){warn.style.color=fora?'var(--red)':'var(--mod)';warn.textContent=fora?'⚠ Fora do limite! Máximo: '+prazoMax(risco)+' ('+prazoMaxDate(risco)+')':'Limite máximo: '+prazoMax(risco)+' ('+prazoMaxDate(risco)+')';}
 }
 function setResolv(id,val){estado[id].resolv=estado[id].resolv===val?null:val;renderItems(_itemSec[id]);}
 
-// ── CÁLCULO ───────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// CÁLCULO DE SCORE
+// ══════════════════════════════════════════════════════════════
 function calcScore(){
-  var totais={M1:0,M2:0,M3:0,M4:0,M5:0},maxEf={M1:0,M2:0,M3:0,M4:0,M5:0},criticos=[];
-  var bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
-  if(bioma){var nb=BIOMA_NOTA[bioma]||0;maxEf['M4']+=9;totais['M4']+=3*nb;if(nb>0)criticos.push({item:{id:'bioma',mod:'M4',risco:nb===3?'MUITO ALTO':'ALTO',peso:3,q:'Bioma: '+bioma},est:{res:'sim',nota:nb,obs:'',fotos:['','',''],resolv:null,acaoImediata:'',fotosDepois:['','',''],plano:{}}});}
-  Object.keys(ITENS).forEach(function(sk){ITENS[sk].forEach(function(item){if(item.mod==='INFO')return;var est=estado[item.id]||{};if(est.res==='na')return;maxEf[item.mod]+=item.peso*3;if(est.res==='sim'&&est.nota){totais[item.mod]+=item.peso*est.nota;criticos.push({item:item,est:est});}});});
-  var pcts={};Object.keys(MAX_MOD).forEach(function(m){pcts[m]=maxEf[m]>0?totais[m]/maxEf[m]:0;});
-  var tp=Object.values(totais).reduce(function(a,b){return a+b;},0),mp=Object.values(maxEf).reduce(function(a,b){return a+b;},0);
-  return{totais:totais,maxEfetivo:maxEf,pcts:pcts,pctGeral:mp>0?tp/mp:0,criticos:criticos,totalPts:tp,maxPts:mp};
+  const totais={M1:0,M2:0,M3:0,M4:0,M5:0},maxEf={M1:0,M2:0,M3:0,M4:0,M5:0};
+  const criticos=[];
+  const bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+  if(bioma){
+    const nb=BIOMA_NOTA[bioma]||0;
+    maxEf['M4']+=9;totais['M4']+=3*nb;
+    if(nb>0)criticos.push({item:{id:'bioma',mod:'M4',risco:nb===3?'MUITO ALTO':'ALTO',peso:3,q:'Bioma: '+bioma},est:{res:'sim',nota:nb,obs:'',fotos:['','',''],resolv:null,acaoImediata:'',fotosDepois:['','',''],plano:{}}});
+  }
+  Object.keys(ITENS).forEach(sk=>{
+    ITENS[sk].forEach(item=>{
+      if(item.mod==='INFO')return;
+      const est=estado[item.id]||{};
+      if(est.res==='na')return;
+      maxEf[item.mod]+=item.peso*3;
+      if(est.res==='sim'&&est.nota){totais[item.mod]+=item.peso*est.nota;criticos.push({item,est});}
+    });
+  });
+  const pcts={};
+  Object.keys(MAX_MOD).forEach(m=>{pcts[m]=maxEf[m]>0?totais[m]/maxEf[m]:0;});
+  const tp=Object.values(totais).reduce((a,b)=>a+b,0),mp=Object.values(maxEf).reduce((a,b)=>a+b,0);
+  return{totais,maxEfetivo:maxEf,pcts,pctGeral:mp>0?tp/mp:0,criticos,totalPts:tp,maxPts:mp};
 }
 
-// ── RADAR ─────────────────────────────────────────────────────
-function buildRadar(pcts){var cx=90,cy=90,maxR=68,mods=['M1','M2','M3','M4','M5'];var angles=[270,342,54,126,198].map(function(d){return d*Math.PI/180;});var pts=mods.map(function(m,i){var r=maxR*(pcts[m]||0);return[cx+r*Math.cos(angles[i]),cy+r*Math.sin(angles[i])];});var polygon=pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');var labels=[[cx,cy-maxR-10,'middle','Chuvas'],[cx+maxR+6,cy-14,'start','Ventos'],[cx+maxR*.6+2,cy+maxR*.85+10,'middle','Incêndio'],[cx-maxR*.6-2,cy+maxR*.85+10,'end','Manut.'],[cx-maxR-6,cy-14,'end','Raios']];var circles=[maxR,maxR*.75,maxR*.5,maxR*.25].map(function(r){return'<circle cx="'+cx+'" cy="'+cy+'" r="'+r.toFixed(1)+'" fill="none" stroke="#e0e4ed" stroke-width="0.5"/>';}).join('');var axes=angles.map(function(a){return'<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+maxR*Math.cos(a)).toFixed(1)+'" y2="'+(cy+maxR*Math.sin(a)).toFixed(1)+'" stroke="#e0e4ed" stroke-width="0.5"/>';}).join('');var lbls=labels.map(function(l){return'<text x="'+l[0]+'" y="'+l[1]+'" font-size="9" fill="#888" font-family="sans-serif" text-anchor="'+l[2]+'">'+l[3]+'</text>';}).join('');return'<svg viewBox="0 0 180 180" width="170" height="170">'+circles+axes+'<polygon points="'+polygon+'" fill="#0E2750" fill-opacity="0.15" stroke="#0E2750" stroke-width="1.5"/>'+lbls+'</svg>';}
+// ══════════════════════════════════════════════════════════════
+// RADAR SVG
+// ══════════════════════════════════════════════════════════════
+function buildRadar(pcts){
+  const cx=90,cy=90,maxR=68,mods=['M1','M2','M3','M4','M5'];
+  const angles=[270,342,54,126,198].map(d=>d*Math.PI/180);
+  const pts=mods.map((m,i)=>{const r=maxR*(pcts[m]||0);return[cx+r*Math.cos(angles[i]),cy+r*Math.sin(angles[i])];});
+  const polygon=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const labels=[[cx,cy-maxR-10,'middle','Chuvas'],[cx+maxR+6,cy-14,'start','Ventos'],[cx+maxR*.6+2,cy+maxR*.85+10,'middle','Incêndio'],[cx-maxR*.6-2,cy+maxR*.85+10,'end','Manut.'],[cx-maxR-6,cy-14,'end','Raios']];
+  const circles=[maxR,maxR*.75,maxR*.5,maxR*.25].map(r=>`<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="#E2E8F0" stroke-width="0.5"/>`).join('');
+  const axes=angles.map(a=>`<line x1="${cx}" y1="${cy}" x2="${(cx+maxR*Math.cos(a)).toFixed(1)}" y2="${(cy+maxR*Math.sin(a)).toFixed(1)}" stroke="#E2E8F0" stroke-width="0.5"/>`).join('');
+  const lbls=labels.map(l=>`<text x="${l[0]}" y="${l[1]}" font-size="9" fill="#94A3B8" font-family="sans-serif" text-anchor="${l[2]}">${l[3]}</text>`).join('');
+  return `<svg viewBox="0 0 180 180" width="160" height="160">${circles}${axes}<polygon points="${polygon}" fill="#0A1F44" fill-opacity="0.15" stroke="#0A1F44" stroke-width="1.5"/>${lbls}</svg>`;
+}
 
-// ── RELATÓRIO HTML ────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════
+// RELATÓRIO HTML
+// ══════════════════════════════════════════════════════════════
 function calcularEIr(n){
-  var score=calcScore();
-  var torre=v('id_torre'),tipo=v('tipo_torre'),circ=v('circuito'),conc=v('concessao'),linha=v('linha'),data=v('data_inspecao'),hIni=v('hora_inicio'),hFim=v('hora_fim'),insp1=v('inspetor1'),insp2=v('inspetor2'),superv=v('supervisor'),fornec=v('contratada'),lat=v('gps_lat'),lon=v('gps_lon'),meteo=v('meteo'),temp=v('temperatura'),obsG=v('obs_gerais');
-  var bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
-  var veget=document.getElementById('vegetacao_livre')?document.getElementById('vegetacao_livre').value:'';
-  var rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
-  var riskBg='#fff3e0',riskFg='#e65100';
-  if(rl==='MUITO ALTO'){riskBg='#ffebee';riskFg='#b71c1c';}else if(rl==='MODERADO'){riskBg='#e3f2fd';riskFg='#1565c0';}else if(rl==='BAIXO'||rl==='MUITO BAIXO'){riskBg='#e8f5e9';riskFg='#2e7d32';}
-  var secNames={s1:'Via de acesso',s2:'Praça e base da torre',s3:'Aterramento e drenagem',s4:'Estrutura e cabos',s5:'Descargas elétricas (raios)',s6:'Incêndio e calor',s7:'Histórico e manutenção'};
-  var secNums={s1:1,s2:2,s3:3,s4:4,s5:5,s6:6,s7:7};
-  var h='<div class="rpt-header"><div><div class="rpt-tower">Torre '+torre+'</div>'+(tipo&&tipo!=='—'?'<div class="rpt-tipo">'+tipo+'</div>':'')+'<div class="rpt-meta"><div class="rpt-meta-row"><span class="rpt-meta-lbl">Concessão</span>'+conc+' · '+linha+' · Circuito '+circ+'</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">Data</span>'+data+(hIni&&hIni!=='—'?' · '+hIni:'')+(hFim&&hFim!=='—'?' – '+hFim:'')+'</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">Inspetor</span>'+insp1+(insp2&&insp2!=='—'?' / '+insp2:'')+'</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">Supervisor</span>'+superv+' · HRZ</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">Fornecedor</span>'+fornec+'</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">GPS</span>'+lat+', '+lon+'</div><div class="rpt-meta-row"><span class="rpt-meta-lbl">Condições</span>'+meteo+(temp&&temp!=='—'?' · '+temp+'°C':'')+'</div></div></div><div class="rpt-right"><div class="rpt-pct">'+pctG+'%</div><div class="rpt-idx-lbl">Índice de Exposição Climática</div><div class="rpt-risk" style="background:'+riskBg+';color:'+riskFg+'">'+rl+'</div></div></div>';
-  var modRows=Object.keys(MAX_MOD).map(function(mod){var pct=score.pcts[mod],pctN=Math.round(pct*100),c=barColor(pct),rl2=riskLabel(pct);return'<div class="rpt-mod-row"><span class="rpt-mod-nm">'+MOD_NAMES[mod].split('—')[1].trim()+'</span><div class="rpt-bw"><div class="rpt-bf" style="width:'+pctN+'%;background:'+c+'"></div></div><span class="rpt-mp" style="color:'+c+'">'+pctN+'%</span><span class="rpt-mr" style="color:'+c+'">'+rl2+'</span></div>';}).join('');
-  h+='<div class="rpt-two"><div class="rpt-radar-card">'+buildRadar(score.pcts)+'</div><div class="rpt-mods">'+modRows+'</div></div>';
-  score.criticos.sort(function(a,b){return(b.item.peso*(b.est.nota||0))-(a.item.peso*(a.est.nota||0));});
-  if(score.criticos.length>0){var critHtml=score.criticos.map(function(entry){var item=entry.item,est=entry.est,nc=notaColor(est.nota);var fotosH='';if(est.fotos&&est.fotos.some(function(f){return f;})){fotosH='<div class="rpt-fotos">';est.fotos.forEach(function(f){if(f)fotosH+='<img class="rpt-crit-foto" src="'+f+'" style="width:80px;height:80px;object-fit:cover" alt="foto">';});fotosH+='</div>';}var resolvH='';if(est.resolv==='sim'){resolvH='<span class="rpt-resolv-tag rpt-resolv-sim">✓ Resolvido na hora</span>';if(est.acaoImediata)resolvH+='<div class="rpt-crit-obs" style="color:#2e7d32">Ação: '+est.acaoImediata+'</div>';if(est.fotosDepois&&est.fotosDepois.some(function(f){return f;})){resolvH+='<div class="rpt-fotos">';est.fotosDepois.forEach(function(f){if(f)resolvH+='<img class="rpt-crit-foto" src="'+f+'" style="width:80px;height:80px;object-fit:cover" alt="depois">';});resolvH+='</div>';}}else if(est.resolv==='nao'){resolvH='<span class="rpt-resolv-tag rpt-resolv-nao">📋 Plano de ação gerado</span>';}return'<div class="rpt-crit"><div class="rpt-crit-head"><span class="rpt-badge" style="'+riskBadgeStyle(item.risco)+'">'+item.risco+'</span>'+(est.nota?'<span class="rpt-nota" style="background:#fff3e0;color:'+nc+'">'+notaLabel(est.nota)+'</span>':'')+'<span class="rpt-mod-tag">'+item.mod+(MOD_NAMES[item.mod]?' · '+MOD_NAMES[item.mod].split('—')[1].trim():'')+'</span></div><div class="rpt-crit-q">'+item.q+'</div>'+(est.obs?'<div class="rpt-crit-obs">'+est.obs+'</div>':'')+fotosH+resolvH+'</div>';}).join('');h+='<div class="rpt-card"><div class="rpt-card-hd">Itens com anomalia registrada</div>'+critHtml+'</div>';}
-  var planoItems=score.criticos.filter(function(c){return c.est.resolv==='nao'&&c.est.plano&&c.est.plano.acao;});
-  if(planoItems.length>0){var planoHtml=planoItems.map(function(entry){var item=entry.item,est=entry.est,pl=est.plano||{},nc=notaColor(est.nota);return'<div class="rpt-crit"><div class="rpt-crit-head"><span class="rpt-badge" style="'+riskBadgeStyle(item.risco)+'">'+item.risco+'</span><span class="rpt-nota" style="background:#fff3e0;color:'+nc+'">'+(est.nota?notaLabel(est.nota):'')+'</span><span class="rpt-mod-tag">Prazo máx.: '+prazoMax(item.risco)+'</span></div><div class="rpt-crit-q">'+item.q+'</div><div class="rpt-plano-box"><div class="rpt-plano-row"><span class="rpt-plano-lbl">Ação: </span>'+(pl.acao||'—')+'</div><div class="rpt-plano-row"><span class="rpt-plano-lbl">Responsável: </span>'+(pl.resp||'—')+(pl.email?' ('+pl.email+')':'')+'</div><div class="rpt-plano-row"><span class="rpt-plano-lbl">Prazo: </span>'+(pl.prazo||'—')+'</div>'+'</div></div>';}).join('');h+='<div class="rpt-card"><div class="rpt-card-hd">Plano de ação ('+planoItems.length+' item'+(planoItems.length>1?'s':'')+')</div>'+planoHtml+'</div>';}
-  var regHtml='';Object.keys(ITENS).forEach(function(secKey){var items=ITENS[secKey];var answered=items.filter(function(it){var e=estado[it.id]||{};return e.res==='sim'||e.res==='nao'||e.res==='na';});var allNao=answered.length>0&&answered.every(function(it){var e=estado[it.id]||{};return e.res==='nao'||e.res==='na';});regHtml+='<div class="rpt-sec-hd"><div class="rpt-sec-num">'+secNums[secKey]+'</div><span class="rpt-sec-nm">'+secNames[secKey]+'</span><span class="rpt-sec-sub">'+(allNao?' — todos sem anomalia':'')+'</span></div>';if(secKey==='s6'&&bioma){regHtml+='<div class="rpt-ans"><div class="rpt-ans-res"><span class="rpt-res rpt-sim">Bioma</span></div><div class="rpt-ans-body"><div class="rpt-ans-q">'+bioma+'</div>'+(veget?'<div class="rpt-ans-obs">Vegetação: '+veget+'</div>':'')+'</div></div>';}items.forEach(function(item){var est=estado[item.id]||{},res=est.res||'';if(!res)return;var isSim=res==='sim',rp=res==='sim'?'rpt-sim':res==='nao'?'rpt-nao':'rpt-na',rl2=res==='sim'?'Sim':res==='nao'?'Não':'N/A';var fotosH='';if(isSim&&est.fotos&&est.fotos.some(function(f){return f;})){fotosH='<div class="rpt-fotos">';est.fotos.forEach(function(f){if(f)fotosH+='<img style="width:55px;height:55px;object-fit:cover;border-radius:5px;border:.5px solid #e0e4ed;" src="'+f+'" alt="foto">';});fotosH+='</div>';}regHtml+='<div class="'+(isSim?'rpt-ans rpt-sim-row':'rpt-ans')+'"><div class="rpt-ans-res"><span class="rpt-res '+rp+'">'+rl2+'</span></div><div class="rpt-ans-body"><div class="rpt-ans-q">'+item.q+(item.mod==='INFO'?' <em style="font-size:10px;color:#888">(informativo)</em>':'')+'</div><div class="rpt-ans-risco">'+item.risco+' · '+item.mod+' · Peso '+item.peso+'</div>'+(isSim&&est.nota?'<span class="rpt-ans-nota" style="color:'+notaColor(est.nota)+'">'+notaLabel(est.nota)+'</span>':'')+(est.obs?'<div class="rpt-ans-obs">'+est.obs+'</div>':'')+fotosH+'</div></div>';});});
-  h+='<div class="rpt-card"><div class="rpt-card-hd">Registro completo da inspeção</div>'+regHtml+'</div>';
-  var tbl='<table class="rpt-tbl"><thead><tr><th style="width:35%">Item</th><th>Risco</th><th class="c">Peso</th><th class="c">Resp.</th><th class="c">Nota</th><th class="r">Obt.</th><th class="r">Máx.</th><th>Contrib.</th></tr></thead><tbody>';
-  Object.keys(MAX_MOD).forEach(function(mod){var modItems=[];Object.keys(ITENS).forEach(function(sk){ITENS[sk].forEach(function(it){if(it.mod===mod)modItems.push(it);});});if(mod==='M4'&&bioma){var bn=BIOMA_NOTA[bioma]||0;modItems.push({id:'bioma',mod:'M4',risco:'—',peso:3,q:'Bioma: '+bioma,_bn:bn});}var mp=Math.round((score.pcts[mod]||0)*100),mc=barColor(score.pcts[mod]||0);tbl+='<tr class="rpt-mod-hdr"><td colspan="5">'+MOD_NAMES[mod]+'</td><td style="text-align:right">'+(score.totais[mod]||0)+'</td><td style="text-align:right;opacity:.7">'+(score.maxEfetivo[mod]||0)+'</td><td style="color:#90caf9;font-weight:700">'+mp+'% — '+riskLabel(score.pcts[mod]||0)+'</td></tr>';modItems.forEach(function(item){if(item.id==='bioma'){var bn=item._bn||0,bpts=3*bn,bpct=Math.round(bpts/9*100);tbl+='<tr><td style="font-size:11px">'+item.q+'</td><td><span style="font-size:9px;padding:2px 4px;border-radius:3px;background:#e8f5e9;color:#2e7d32">BIOMA</span></td><td class="c">3</td><td class="c"><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;background:#e8f5e9;color:#2e7d32">Auto</span></td><td class="c">'+(bn>0?'<span class="nota-c" style="background:'+notaColor(bn)+'">'+bn+'</span>':'—')+'</td><td class="r" style="font-weight:700;color:'+(bpts>0?'#e65100':'#888')+'">'+bpts+'</td><td class="r" style="color:#888">9</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:'+bpct+'%;background:'+mc+'"></div></div></td></tr>';return;}if(item.mod==='INFO'){tbl+='<tr><td style="font-size:11px;color:#6b7280;font-style:italic">'+item.q+'</td><td colspan="7" style="font-size:10px;color:#888;font-style:italic">Informativo</td></tr>';return;}var est=estado[item.id]||{},res=est.res||'',nota=res==='sim'?(est.nota||0):0,pts=item.peso*nota,mi=res==='na'?0:item.peso*3,pi=mi>0?Math.round(pts/mi*100):0;var rp=res==='sim'?'rpt-sim':res==='nao'?'rpt-nao':res==='na'?'rpt-na':'',rl2=res==='sim'?'Sim':res==='nao'?'Não':res==='na'?'N/A':'—';tbl+='<tr class="'+(res==='sim'?'rpt-sim-row':'')+'"><td style="font-size:11px;line-height:1.3">'+item.q+'</td><td><span style="font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;'+riskBadgeStyle(item.risco)+'">'+item.risco+'</span></td><td class="c">'+item.peso+'</td><td class="c">'+(res?'<span class="rpt-res '+rp+'" style="font-size:10px">'+rl2+'</span>':'—')+'</td><td class="c">'+(nota>0?'<span class="nota-c" style="background:'+notaColor(nota)+'">'+nota+'</span>':'—')+'</td><td class="r" style="font-weight:700;color:'+(pts>0?'#e65100':'#888')+'">'+(res?pts:'—')+'</td><td class="r" style="color:#888">'+(res==='na'?'N/A':item.peso*3)+'</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:'+pi+'%;background:'+mc+'"></div></div></td></tr>';});tbl+='<tr class="rpt-subtotal"><td colspan="5" style="color:#6b7280">Subtotal '+MOD_NAMES[mod].split('—')[0].trim()+'</td><td class="r" style="color:'+mc+'">'+(score.totais[mod]||0)+'</td><td class="r" style="color:#888">'+(score.maxEfetivo[mod]||0)+'</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:'+mp+'%;background:'+mc+'"></div></div></td></tr>';});
-  tbl+='<tr class="rpt-total"><td colspan="5">Total geral</td><td class="r">'+score.totalPts+'</td><td class="r" style="opacity:.7">'+score.maxPts+'</td><td style="font-weight:700;color:#90caf9">'+pctG+'% — '+rl+'</td></tr></tbody></table>';
-  h+='<div class="rpt-card"><div class="rpt-card-hd">Pontuação detalhada por item</div>'+tbl+'</div>';
-  if(obsG&&obsG!=='—')h+='<div class="rpt-card"><div class="rpt-card-hd">Observações gerais</div><div style="padding:11px 13px;font-size:13px;line-height:1.6">'+obsG+'</div></div>';
-  h+='<div class="rpt-footer">HRZ Transmissoras · Auditoria Climática · PQI Climate · '+data+'</div>';
+  // Validação: hora de término não pode ser anterior à hora de início
+  const hIniVal=v('hora_inicio'),hFimVal=v('hora_fim');
+  if(hIniVal&&hFimVal&&hFimVal<hIniVal){
+    alert('⚠ A hora de término não pode ser anterior à hora de início.');
+    return;
+  }
+  // Validação: todos os itens do checklist precisam ter resposta
+  const allItens=Object.values(ITENS).flat();
+  const semResposta=allItens.filter(it=>!estado[it.id]||!estado[it.id].res);
+  if(semResposta.length>0){
+    alert(`⚠ ${semResposta.length} ${semResposta.length===1?'item do checklist ainda não tem resposta':'itens do checklist ainda não têm resposta'}. Preencha todos os itens antes de ver o resultado.`);
+    return;
+  }
+  // Validação: itens com resposta "Não" precisam de pelo menos uma foto de evidência
+  const naoSemFoto=allItens.filter(it=>{
+    if(!estado[it.id]||estado[it.id].res!=='nao')return false;
+    const fotos=estado[it.id].fotos||[];
+    return !fotos.some(f=>f&&f!=='loading');
+  });
+  if(naoSemFoto.length>0){
+    const nomes=naoSemFoto.map(it=>it.label||it.id).join('\n• ');
+    alert(`⚠ Os itens abaixo têm resposta "Não" mas não têm foto de evidência:\n• ${nomes}\n\nAnexe pelo menos uma foto para cada item antes de continuar.`);
+    return;
+  }
+  const score=calcScore();
+  const torre=v('id_torre'),tipo=v('tipo_torre'),circ=v('circuito'),conc=v('concessao'),linha=v('linha');
+  const data=v('data_inspecao'),hIni=v('hora_inicio'),hFim=v('hora_fim');
+  const insp1=v('inspetor1'),insp2=v('inspetor2'),superv=v('supervisor'),fornec=v('contratada');
+  const lat=v('gps_lat'),lon=v('gps_lon'),meteo=v('meteo'),temp=v('temperatura'),obsG=v('obs_gerais');
+  const bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+  const veget=document.getElementById('vegetacao_livre')?document.getElementById('vegetacao_livre').value:'';
+  const rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
+  let riskBg='#FFFBEB',riskFg='#F59E0B';
+  if(rl==='MUITO ALTO'){riskBg='#FEF2F2';riskFg='#DC2626';}
+  else if(rl==='MODERADO'){riskBg='#EFF6FF';riskFg='#2563EB';}
+  else if(rl==='BAIXO'||rl==='MUITO BAIXO'){riskBg='#ECFDF5';riskFg='#10B981';}
+
+  const secNames={s1:'Via de acesso',s2:'Praça e base da torre',s3:'Aterramento e drenagem',s4:'Estrutura e cabos',s5:'Descargas elétricas (raios)',s6:'Incêndio e calor',s7:'Histórico e manutenção'};
+  const secNums={s1:1,s2:2,s3:3,s4:4,s5:5,s6:6,s7:7};
+
+  let h=`<div class="rpt-header">
+    <div>
+      <div class="rpt-tower">Torre ${torre}</div>
+      ${tipo&&tipo!=='—'?`<div class="rpt-tipo">${tipo}</div>`:''}
+      <div class="rpt-meta">
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Concessão</span>${conc} · ${linha} · Circuito ${circ}</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Data</span>${data}${hIni&&hIni!=='—'?' · '+hIni:''}${hFim&&hFim!=='—'?' – '+hFim:''}</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Inspetor</span>${insp1}${insp2&&insp2!=='—'?' / '+insp2:''}</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Supervisor</span>${superv} · HRZ</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Fornecedor</span>${fornec}</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">GPS</span>${lat}, ${lon}</div>
+        <div class="rpt-meta-row"><span class="rpt-meta-lbl">Condições</span>${meteo}${temp&&temp!=='—'?' · '+temp+'°C':''}</div>
+      </div>
+      <div style="margin-top:10px;"><span class="rpt-atlas-badge">A ATLAS · HRZ</span></div>
+    </div>
+    <div class="rpt-right">
+      <div class="rpt-pct">${pctG}%</div>
+      <div class="rpt-idx-lbl">Índice de Exposição Climática</div>
+      <div class="rpt-risk" style="background:${riskBg};color:${riskFg}">${rl}</div>
+    </div>
+  </div>`;
+
+  const modRows=Object.keys(MAX_MOD).map(mod=>{
+    const pct=score.pcts[mod],pctN=Math.round(pct*100),c=barColor(pct),rl2=riskLabel(pct);
+    return `<div class="rpt-mod-row"><span class="rpt-mod-nm">${MOD_NAMES[mod].split('—')[1].trim()}</span><div class="rpt-bw"><div class="rpt-bf" style="width:${pctN}%;background:${c}"></div></div><span class="rpt-mp" style="color:${c}">${pctN}%</span><span class="rpt-mr" style="color:${c}">${rl2}</span></div>`;
+  }).join('');
+
+  h+=`<div class="rpt-two"><div class="rpt-radar-card">${buildRadar(score.pcts)}</div><div class="rpt-mods">${modRows}</div></div>`;
+
+  score.criticos.sort((a,b)=>(b.item.peso*(b.est.nota||0))-(a.item.peso*(a.est.nota||0)));
+
+  if(score.criticos.length>0){
+    const critHtml=score.criticos.map(({item,est})=>{
+      const nc=notaColor(est.nota);
+      let fotosH='';
+      if(est.fotos&&est.fotos.some(f=>f&&f!=='loading')){
+        fotosH='<div class="rpt-fotos">';
+        est.fotos.forEach(f=>{if(f&&f!=='loading')fotosH+=`<img class="rpt-crit-foto" src="${f}" style="width:80px;height:80px;object-fit:cover" alt="foto">`;});
+        fotosH+='</div>';
+      }
+      let resolvH='';
+      if(est.resolv==='sim'){
+        resolvH='<span class="rpt-resolv-tag rpt-resolv-sim">✓ Resolvido na hora</span>';
+        if(est.acaoImediata)resolvH+=`<div class="rpt-crit-obs" style="color:var(--green)">Ação: ${est.acaoImediata}</div>`;
+        if(est.fotosDepois&&est.fotosDepois.some(f=>f&&f!=='loading')){
+          resolvH+='<div class="rpt-fotos">';
+          est.fotosDepois.forEach(f=>{if(f&&f!=='loading')resolvH+=`<img class="rpt-crit-foto" src="${f}" style="width:80px;height:80px;object-fit:cover" alt="depois">`;});
+          resolvH+='</div>';
+        }
+      }else if(est.resolv==='nao'){
+        resolvH='<span class="rpt-resolv-tag rpt-resolv-nao">📋 Plano de ação gerado</span>';
+      }
+      return `<div class="rpt-crit"><div class="rpt-crit-head"><span class="rpt-badge" style="${riskBadgeStyle(item.risco)}">${item.risco}</span>${est.nota?`<span class="rpt-nota" style="background:#FFFBEB;color:${nc}">${notaLabel(est.nota)}</span>`:''}<span class="rpt-mod-tag">${item.mod}${MOD_NAMES[item.mod]?' · '+MOD_NAMES[item.mod].split('—')[1].trim():''}</span></div><div class="rpt-crit-q">${item.q}</div>${est.obs?'<div class="rpt-crit-obs">'+est.obs+'</div>':''}${fotosH}${resolvH}</div>`;
+    }).join('');
+    h+=`<div class="rpt-card"><div class="rpt-card-hd">Itens com anomalia registrada</div>${critHtml}</div>`;
+  }
+
+  // Itens aguardando plano de ação (back-office HRZ)
+  const planoItems=score.criticos.filter(c=>c.est.resolv==='nao');
+  if(planoItems.length>0){
+    const planoHtml=planoItems.map(({item,est})=>{
+      const nc=notaColor(est.nota);
+      const contexto=est.plano&&est.plano.contexto?est.plano.contexto:'';
+      return `<div class="rpt-crit">
+        <div class="rpt-crit-head">
+          <span class="rpt-badge" style="${riskBadgeStyle(item.risco)}">${item.risco}</span>
+          ${est.nota?`<span class="rpt-nota" style="background:#FFFBEB;color:${nc}">${notaLabel(est.nota)}</span>`:''}
+          <span class="rpt-mod-tag">Prazo máx.: ${prazoMax(item.risco)}</span>
+        </div>
+        <div class="rpt-crit-q">${item.q}</div>
+        <div class="rpt-plano-box" style="background:#F0F4FF;border-left-color:#93C5FD;">
+          <div style="font-size:10px;font-weight:700;color:#2563EB;margin-bottom:4px;">📋 AGUARDA PLANO DE AÇÃO — Equipe HRZ</div>
+          ${contexto?`<div class="rpt-plano-row"><span class="rpt-plano-lbl">Contexto: </span>${contexto}</div>`:''}
+          <div class="rpt-plano-row" style="color:#94A3B8;font-style:italic;">Responsável, prazo e ação a definir após inspeção.</div>
+        </div>
+      </div>`;
+    }).join('');
+    h+=`<div class="rpt-card"><div class="rpt-card-hd">Ações corretivas pendentes — ${planoItems.length} item${planoItems.length>1?'s':''}</div>${planoHtml}</div>`;
+  }
+
+  // Registro completo
+  let regHtml='';
+  Object.keys(ITENS).forEach(secKey=>{
+    const items=ITENS[secKey];
+    const answered=items.filter(it=>{const e=estado[it.id]||{};return e.res==='sim'||e.res==='nao'||e.res==='na';});
+    const allNao=answered.length>0&&answered.every(it=>{const e=estado[it.id]||{};return e.res==='nao'||e.res==='na';});
+    regHtml+=`<div class="rpt-sec-hd"><div class="rpt-sec-num">${secNums[secKey]}</div><span class="rpt-sec-nm">${secNames[secKey]}</span><span class="rpt-sec-sub">${allNao?' — sem anomalias':''}</span></div>`;
+    if(secKey==='s6'&&bioma){
+      regHtml+=`<div class="rpt-ans"><div class="rpt-ans-res"><span class="rpt-res rpt-sim">Bioma</span></div><div class="rpt-ans-body"><div class="rpt-ans-q">${bioma}</div>${veget?'<div class="rpt-ans-obs">Vegetação: '+veget+'</div>':''}</div></div>`;
+    }
+    items.forEach(item=>{
+      const est=estado[item.id]||{},res=est.res||'';
+      if(!res)return;
+      const isSim=res==='sim',rp=res==='sim'?'rpt-sim':res==='nao'?'rpt-nao':'rpt-na',rl2=res==='sim'?'Sim':res==='nao'?'Não':'N/A';
+      let fotosH='';
+      if(isSim&&est.fotos&&est.fotos.some(f=>f&&f!=='loading')){
+        fotosH='<div class="rpt-fotos">';
+        est.fotos.forEach(f=>{if(f&&f!=='loading')fotosH+=`<img style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:.5px solid var(--border);" src="${f}" alt="foto">`;});
+        fotosH+='</div>';
+      }
+      regHtml+=`<div class="${isSim?'rpt-ans rpt-sim-row':'rpt-ans'}"><div class="rpt-ans-res"><span class="rpt-res ${rp}">${rl2}</span></div><div class="rpt-ans-body"><div class="rpt-ans-q">${item.q}${item.mod==='INFO'?' <em style="font-size:10px;color:#888">(informativo)</em>':''}</div><div class="rpt-ans-risco">${item.risco} · ${item.mod} · Peso ${item.peso}</div>${isSim&&est.nota?`<span class="rpt-ans-nota" style="color:${notaColor(est.nota)}">${notaLabel(est.nota)}</span>`:''}${est.obs?'<div class="rpt-ans-obs">'+est.obs+'</div>':''}${fotosH}</div></div>`;
+    });
+  });
+  h+=`<div class="rpt-card"><div class="rpt-card-hd">Registro completo da inspeção</div>${regHtml}</div>`;
+
+  // Tabela de pontuação
+  let tbl='<table class="rpt-tbl"><thead><tr><th style="width:35%">Item</th><th>Risco</th><th class="c">Peso</th><th class="c">Resp.</th><th class="c">Nota</th><th class="r">Obt.</th><th class="r">Máx.</th><th>Contrib.</th></tr></thead><tbody>';
+  Object.keys(MAX_MOD).forEach(mod=>{
+    const modItems=[];
+    Object.keys(ITENS).forEach(sk=>{ITENS[sk].forEach(it=>{if(it.mod===mod)modItems.push(it);});});
+    const bioma2=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+    if(mod==='M4'&&bioma2){const bn=BIOMA_NOTA[bioma2]||0;modItems.push({id:'bioma',mod:'M4',risco:'—',peso:3,q:'Bioma: '+bioma2,_bn:bn});}
+    const mp=Math.round((score.pcts[mod]||0)*100),mc=barColor(score.pcts[mod]||0);
+    tbl+=`<tr class="rpt-mod-hdr"><td colspan="5">${MOD_NAMES[mod]}</td><td style="text-align:right">${score.totais[mod]||0}</td><td style="text-align:right;opacity:.7">${score.maxEfetivo[mod]||0}</td><td style="color:#93C5FD;font-weight:700">${mp}% — ${riskLabel(score.pcts[mod]||0)}</td></tr>`;
+    modItems.forEach(item=>{
+      if(item.id==='bioma'){
+        const bn=item._bn||0,bpts=3*bn,bpct=Math.round(bpts/9*100);
+        tbl+=`<tr><td style="font-size:11px">${item.q}</td><td><span style="font-size:9px;padding:2px 4px;border-radius:3px;background:#ECFDF5;color:#10B981">BIOMA</span></td><td class="c">3</td><td class="c"><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;background:#ECFDF5;color:#10B981">Auto</span></td><td class="c">${bn>0?`<span class="nota-c" style="background:${notaColor(bn)}">${bn}</span>`:'—'}</td><td class="r" style="font-weight:700;color:${bpts>0?'var(--orange)':'#888'}">${bpts}</td><td class="r" style="color:#888">9</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:${bpct}%;background:${mc}"></div></div></td></tr>`;
+        return;
+      }
+      if(item.mod==='INFO'){tbl+=`<tr><td style="font-size:11px;color:var(--muted);font-style:italic">${item.q}</td><td colspan="7" style="font-size:10px;color:#888;font-style:italic">Informativo</td></tr>`;return;}
+      const est=estado[item.id]||{},res=est.res||'',nota=res==='sim'?(est.nota||0):0,pts=item.peso*nota,mi=res==='na'?0:item.peso*3,pi=mi>0?Math.round(pts/mi*100):0;
+      const rp=res==='sim'?'rpt-sim':res==='nao'?'rpt-nao':res==='na'?'rpt-na':'',rl2=res==='sim'?'Sim':res==='nao'?'Não':res==='na'?'N/A':'—';
+      tbl+=`<tr class="${res==='sim'?'rpt-sim-row':''}"><td style="font-size:11px;line-height:1.3">${item.q}</td><td><span style="font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;${riskBadgeStyle(item.risco)}">${item.risco}</span></td><td class="c">${item.peso}</td><td class="c">${res?`<span class="rpt-res ${rp}" style="font-size:10px">${rl2}</span>`:'—'}</td><td class="c">${nota>0?`<span class="nota-c" style="background:${notaColor(nota)}">${nota}</span>`:'—'}</td><td class="r" style="font-weight:700;color:${pts>0?'var(--orange)':'#888'}">${res?pts:'—'}</td><td class="r" style="color:#888">${res==='na'?'N/A':item.peso*3}</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:${pi}%;background:${mc}"></div></div></td></tr>`;
+    });
+    tbl+=`<tr class="rpt-subtotal"><td colspan="5" style="color:var(--muted)">Subtotal ${MOD_NAMES[mod].split('—')[0].trim()}</td><td class="r" style="color:${mc}">${score.totais[mod]||0}</td><td class="r" style="color:#888">${score.maxEfetivo[mod]||0}</td><td><div class="rpt-tbl-bw"><div class="rpt-tbl-bf" style="width:${mp}%;background:${mc}"></div></div></td></tr>`;
+  });
+  tbl+=`<tr class="rpt-total"><td colspan="5">Total geral</td><td class="r">${score.totalPts}</td><td class="r" style="opacity:.7">${score.maxPts}</td><td style="font-weight:700;color:#93C5FD">${pctG}% — ${rl}</td></tr></tbody></table>`;
+  h+=`<div class="rpt-card"><div class="rpt-card-hd">Pontuação detalhada por item</div>${tbl}</div>`;
+
+  if(obsG&&obsG!=='—')h+=`<div class="rpt-card"><div class="rpt-card-hd">Observações gerais</div><div style="padding:12px 14px;font-size:13px;line-height:1.6">${obsG}</div></div>`;
+  h+=`<div class="rpt-footer"><span class="rpt-atlas-badge">A ATLAS · HRZ</span> · Inspeção Climática · ${data}</div>`;
+
   document.getElementById('rpt-content').innerHTML=h;
   goTo(n);
 }
 
-// ── CORPO DO EMAIL (DETALHADO) ────────────────────────────────
-function montarCorpoTexto(){
-  var NL='\n',score=calcScore();
-  var torre=v('id_torre'),tipo=v('tipo_torre'),circ=v('circuito'),conc=v('concessao'),linha=v('linha');
-  var data=v('data_inspecao'),hIni=v('hora_inicio'),hFim=v('hora_fim');
-  var insp1=v('inspetor1'),insp2=v('inspetor2'),superv=v('supervisor'),fornec=v('contratada');
-  var lat=v('gps_lat'),lon=v('gps_lon'),meteo=v('meteo'),temp=v('temperatura'),obsG=v('obs_gerais');
-  var bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
-  var veget=document.getElementById('vegetacao_livre')?document.getElementById('vegetacao_livre').value:'';
-  var rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
-  var b='PQI CLIMATE — HRZ TRANSMISSORAS'+NL;
-  b+='================================='+NL;
-  b+='Torre: '+torre+(tipo&&tipo!=='—'?' ('+tipo+')':'')+NL;
-  b+='Concessao: '+conc+' | Linha: '+linha+' | Circuito: '+circ+NL;
-  b+='Data: '+data+(hIni&&hIni!=='—'?' | Inicio: '+hIni:'')+(hFim&&hFim!=='—'?' | Termino: '+hFim:'')+NL;
-  b+='Inspetor: '+insp1+(insp2&&insp2!=='—'?' / '+insp2:'')+NL;
-  b+='Supervisor: '+superv+NL+'Fornecedor: '+fornec+NL;
-  b+='GPS: '+lat+', '+lon+NL;
-  b+='Condicoes: '+meteo+(temp&&temp!=='—'?' | '+temp+'C':'')+NL;
-  if(bioma)b+='Bioma: '+bioma+(veget?' | Vegetacao: '+veget:'')+NL;
-  b+=NL+'================================='+NL;
-  b+='INDICE GERAL: '+pctG+'% - '+rl+NL;
-  b+='================================='+NL+NL;
-  b+='PONTUACAO POR MODULO:'+NL;
-  Object.keys(MAX_MOD).forEach(function(mod){
-    var pts=score.totais[mod]||0,mx=score.maxEfetivo[mod]||0;
-    b+=MOD_NAMES[mod].split('—')[0].trim()+': '+Math.round((score.pcts[mod]||0)*100)+'% - '+riskLabel(score.pcts[mod]||0)+' ('+pts+'/'+mx+' pts)'+NL;
-  });
-  // Anomalias
-  if(score.criticos.length>0){
-    b+=NL+'ITENS COM ANOMALIA ('+score.criticos.length+'):'+NL;
-    b+='------------------------------'+NL;
-    score.criticos.forEach(function(c,i){
-      b+=(i+1)+'. ['+c.item.risco+'] '+c.item.q+NL;
-      if(c.est.nota)b+='   Nota: '+notaLabel(c.est.nota)+NL;
-      if(c.est.obs)b+='   Observacao: '+c.est.obs+NL;
-      if(c.est.fotos&&c.est.fotos.some(function(f){return f;}))b+='   Fotos: '+c.est.fotos.filter(function(f){return f;}).length+' foto(s) anexada(s) no PDF'+NL;
-      if(c.est.resolv==='sim'){b+='   Status: RESOLVIDO NA HORA'+NL;if(c.est.acaoImediata)b+='   Acao realizada: '+c.est.acaoImediata+NL;}
-      else if(c.est.resolv==='nao'&&c.est.plano){
-        var pl=c.est.plano;
-        b+='   Status: PENDENTE - PLANO DE ACAO'+NL;
-        b+='   Acao: '+(pl.acao||'—')+NL;
-        b+='   Responsavel: '+(pl.resp||'—')+(pl.email?' ('+pl.email+')':'')+NL;
-        b+='   Prazo: '+(pl.prazo||pl.prazoData||'—')+(pl.prazoData&&checkPrazoFora(pl.prazoData,c.item.risco)?' (FORA DO LIMITE)':'')+NL;
-      }
-      b+='------------------------------'+NL;
-    });
-  }
-  // Plano de ação resumido
-  var planoItems=score.criticos.filter(function(c){return c.est.resolv==='nao'&&c.est.plano&&c.est.plano.acao;});
-  if(planoItems.length>0){
-    b+=NL+'PLANO DE ACAO CONSOLIDADO ('+planoItems.length+' item'+(planoItems.length>1?'s':'')+'):'+NL;
-    b+='------------------------------'+NL;
-    planoItems.forEach(function(entry,i){
-      var pl=entry.est.plano||{};
-      b+=(i+1)+'. '+entry.item.q+NL;
-      b+='   Acao: '+(pl.acao||'—')+NL;
-      b+='   Responsavel: '+(pl.resp||'—')+(pl.email?' ('+pl.email+')':'')+NL;
-      b+='   Prazo: '+(pl.prazo||pl.prazoData||'—')+(pl.prazoData&&checkPrazoFora(pl.prazoData,entry.item.risco)?' (FORA DO LIMITE)':'')+NL;
-      b+='------------------------------'+NL;
-    });
-  }
-  // Registro completo de TODOS os itens
-  b+=NL+'REGISTRO COMPLETO DE TODOS OS ITENS:'+NL;
-  var secN={s1:'1. VIA DE ACESSO',s2:'2. PRACA E BASE',s3:'3. ATERRAMENTO E DRENAGEM',s4:'4. ESTRUTURA E CABOS',s5:'5. DESCARGAS ELETRICAS (RAIOS)',s6:'6. INCENDIO E CALOR',s7:'7. HISTORICO E MANUTENCAO'};
-  Object.keys(ITENS).forEach(function(sk){
-    b+=NL+'--- '+secN[sk]+' ---'+NL;
-    if(sk==='s6'&&bioma){b+='Bioma: '+bioma+(veget?' | Vegetacao: '+veget:'')+NL;}
-    ITENS[sk].forEach(function(item){
-      var est=estado[item.id]||{};
-      if(!est.res)return;
-      var rl2=est.res==='sim'?'SIM':est.res==='nao'?'NAO':'N/A';
-      b+='['+rl2+'] '+item.q+NL;
-      b+='       Risco: '+item.risco+' | Modulo: '+item.mod+' | Peso: '+item.peso+NL;
-      if(est.res==='sim'&&est.nota)b+='       Nota: '+notaLabel(est.nota)+NL;
-      if(est.obs)b+='       Obs: '+est.obs+NL;
-      if(est.resolv==='sim'){b+='       Resolvido na hora: SIM'+NL;if(est.acaoImediata)b+='       Acao: '+est.acaoImediata+NL;}
-      else if(est.resolv==='nao')b+='       Plano de acao: SIM (ver acima)'+NL;
-    });
-  });
-  if(obsG&&obsG!=='—'){b+=NL+'OBSERVACOES GERAIS:'+NL+obsG+NL;}
-  b+=NL+'================================='+NL;
-  b+='NOTA: As fotos estao no PDF anexado.'+NL;
-  b+='Gerado pelo PQI Climate - HRZ Transmissoras'+NL;
-  b+='Data/hora: '+new Date().toLocaleString('pt-BR');
-  return b;
-}
 
-// ── GERAR PDF ─────────────────────────────────────────────────
-// ── GERAR PDF (núcleo reutilizável) ───────────────────────────
-async function _gerarPDFCore(){
-  var jsPDF=window.jspdf.jsPDF;
-  var element=document.getElementById('rpt-content');
-  setProgress(15,'Capturando relatório...');
-  await new Promise(function(r){setTimeout(r,100);});
-
-  // Força largura A4 (794px @ 96dpi) independente do dispositivo
-  var originalWidth=element.style.width;
-  element.style.width='794px';
-  element.style.maxWidth='794px';
-  await new Promise(function(r){setTimeout(r,80);});
-
-  var canvas=await html2canvas(element,{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794});
-
-  // Restaura largura original
-  element.style.width=originalWidth;
-  element.style.maxWidth='';
-
-  setProgress(60,'Montando páginas...');
-  var imgData=canvas.toDataURL('image/jpeg',.85);
-  var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
-  var iw=pw,ih=(canvas.height*iw)/canvas.width,yPos=0,rem=ih,page=0,total=Math.ceil(ih/ph);
-  while(rem>0){if(yPos>0)pdf.addPage();pdf.addImage(imgData,'JPEG',0,-yPos,iw,ih);yPos+=ph;rem-=ph;page++;setProgress(60+Math.round(page/total*30),'Página '+page+' de '+total+'...');await new Promise(function(r){setTimeout(r,30);});}
-  setProgress(95,'Salvando...');
-  await new Promise(function(r){setTimeout(r,80);});
-  var torre=document.getElementById('id_torre').value||'torre';
-  var data=document.getElementById('data_inspecao').value||'data';
-  var nome='PQI_Climate_'+torre+'_'+data+'.pdf';
-  pdf.save(nome);
-  window._pdfBase64=pdf.output('datauristring').split(',')[1];
-  window._pdfName=nome;
-  saveInspection();
-  _pdfGenerated=true;
-  _sendDone=false;
-  setProgress(100,'Pronto!');
-  await new Promise(function(r){setTimeout(r,600);});
-  hideProgress();
-  return nome;
-}
-
-// ── BOTÃO PRINCIPAL: Gerar PDF + WhatsApp ─────────────────────
-
-// ── RESUMO CURTO PARA WA (descrição do arquivo) ──────────────
-function montarResumoWA(){
-  var score=calcScore();
-  var torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao');
-  var rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
-  var nAnomalia=score.criticos.length;
-  var resumo='PQI Climate HRZ | Torre '+torre+' | '+conc+' | '+data;
-  resumo+=' | Índice: '+pctG+'% '+rl;
-  if(nAnomalia>0)resumo+=' | '+nAnomalia+' anomalia'+(nAnomalia>1?'s':'');
-  return resumo.substring(0,200);
-}
-
+// ══════════════════════════════════════════════════════════════
+// GERAÇÃO PDF
+// ══════════════════════════════════════════════════════════════
 async function gerarPDFBase(){
-  var btn=document.getElementById('btn-gerar-pdf');
-  btn.disabled=true;btn.textContent='⏳ Gerando PDF...';
-  showProgress('Gerando PDF');
+  const torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao');
+  if(torre==='—'||!torre.trim()){alert('Preencha o ID da Torre antes de gerar o PDF.');return;}
+  showProgress('Gerando PDF...');
+  setProgress(10,'Preparando relatório...');
+  await new Promise(r=>setTimeout(r,200));
   try{
-    var nome=await _gerarPDFCore();
-    btn.textContent='✓ PDF gerado — gerar novamente';
-    btn.disabled=false;
-    btn.style.background='#2e7d32';
+    setProgress(30,'Renderizando conteúdo...');
+    const el=document.getElementById('rpt-content');
+    await new Promise(r=>setTimeout(r,300));
+    setProgress(50,'Capturando tela...');
+    const canvas=await html2canvas(el,{scale:1.8,useCORS:true,logging:false,backgroundColor:'#ffffff',imageTimeout:15000});
+    setProgress(75,'Gerando PDF...');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight();
+    const imgW=pageW-20,imgH=(canvas.height*imgW)/canvas.width;
+    const imgData=canvas.toDataURL('image/jpeg',0.92);
+    let y=10;
+    if(imgH<=pageH-20){
+      pdf.addImage(imgData,'JPEG',10,y,imgW,imgH);
+    }else{
+      let srcY=0;
+      const ratio=canvas.width/imgW;
+      while(srcY<canvas.height){
+        const sliceH=Math.min((pageH-20)*ratio,canvas.height-srcY);
+        const sliceCanvas=document.createElement('canvas');
+        sliceCanvas.width=canvas.width;sliceCanvas.height=sliceH;
+        sliceCanvas.getContext('2d').drawImage(canvas,0,srcY,canvas.width,sliceH,0,0,canvas.width,sliceH);
+        const sliceData=sliceCanvas.toDataURL('image/jpeg',0.92);
+        pdf.addImage(sliceData,'JPEG',10,10,imgW,sliceH/ratio);
+        srcY+=sliceH;
+        if(srcY<canvas.height){pdf.addPage();}
+      }
+    }
+    setProgress(90,'Salvando...');
+    const nomePDF=`ATLAS_${conc}_${torre}_${data}.pdf`.replace(/[^a-zA-Z0-9_\-\.]/g,'_');
+    const pdfBase64=pdf.output('datauristring').split(',')[1];
+    window._pdfBase64=pdfBase64;
+    window._pdfName=nomePDF;
+    setProgress(100,'Concluído!');
+    await new Promise(r=>setTimeout(r,400));
+    hideProgress();
+    // Salva a inspeção no IndexedDB
+    await saveInspection();
+    _pdfGenerated=true;
+    document.getElementById('btn-gerar-pdf').textContent='✓ PDF Gerado';
+    document.getElementById('btn-gerar-pdf').style.background='var(--green)';
+    document.getElementById('btn-gerar-pdf').disabled=true;
     document.getElementById('acoes-pos-pdf').style.display='block';
-    showEnvioFeedback('✅ PDF salvo: "'+nome+'"',true);
+    showEnvioFeedback('✓ PDF gerado com sucesso! Escolha como deseja compartilhar.',true);
   }catch(e){
-    hideProgress();btn.textContent='📋 Finalizar e Sincronizar';btn.disabled=false;btn.style.background='#0E2750';
-    alert('Erro: '+e.message);
+    hideProgress();
+    console.error(e);
+    alert('Erro ao gerar PDF: '+e.message+'\nTente novamente.');
   }
 }
 
-// ── BOTÃO ÚNICO: Gerar PDF + Sincronizar + Compartilhar ───────
-async function gerarSincronizarCompartilhar(){
-  var btn=document.getElementById('btn-gerar-pdf');
-  btn.disabled=true;btn.textContent='⏳ Gerando PDF...';
-  showProgress('Gerando PDF');
-  try{
-    // 1. Gera PDF
-    var nome=await _gerarPDFCore();
-    btn.textContent='⏳ Sincronizando...';
+// ══════════════════════════════════════════════════════════════
+// HELPERS DE PAYLOAD — Power Automate
+// ══════════════════════════════════════════════════════════════
 
-    // 2. Popup salvar PDF
-    var isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
-    var msg='';
-    if(isIOS){
-      msg='📁 Para manter um registro:\n\n1. O PDF abriu no Safari\n2. Toque em Compartilhar (□ com seta)\n3. Escolha "Salvar em Arquivos"\n\nClique OK para sincronizar com o SharePoint.';
-    }else{
-      msg='📁 Para manter um registro:\n\nO PDF foi salvo em Downloads.\n\nClique OK para sincronizar com o SharePoint.';
-    }
-    if(!confirm(msg)){
-      btn.disabled=false;btn.textContent='📋 Finalizar e Sincronizar';btn.style.background='#0E2750';
-      return;
-    }
-
-    // 3. Sincroniza com SharePoint
-    if(!navigator.onLine){
-      showEnvioFeedback('⚠️ Sem conexão. PDF salvo. Tente novamente quando tiver sinal.',false);
-      btn.disabled=false;btn.textContent='📋 Finalizar e Sincronizar';btn.style.background='#0E2750';
-      document.getElementById('acoes-pos-pdf').style.display='block';
-      return;
-    }
-    var score=calcScore();
-    var inspID=gerarInspectionID();
-    _currentInspId=inspID;
-    var erros=[];
-    try{
-      var p1=montarPayloadInspecao(score,inspID);
-      var r1=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p1)});
-      if(!r1.ok&&r1.status!==202)throw new Error('status '+r1.status);
-    }catch(e){erros.push(e.message);}
-    if(WEBHOOK_CHECKLIST_URL){
-      try{
-        var rows=montarPayloadChecklist(score,inspID);
-        var r2=await fetch(WEBHOOK_CHECKLIST_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'hrz2026pqi',inspection_id:inspID,rows:rows})});
-        if(!r2.ok&&r2.status!==202)throw new Error('status '+r2.status);
-      }catch(e){erros.push(e.message);}
-    }
-
-    // 4. Resultado
-    if(erros.length===0){
-      btn.textContent='✓ Concluído';btn.style.background='#2e7d32';btn.disabled=false;
-      document.getElementById('acoes-pos-pdf').style.display='block';
-      showEnvioFeedback('✅ PDF salvo e dados sincronizados! ID: '+inspID+'\n\nAgora compartilhe o PDF pelo botão abaixo.',true);
-    }else{
-      btn.textContent='⚠️ PDF salvo — erro ao sincronizar';btn.style.background='#e65100';btn.disabled=false;
-      document.getElementById('acoes-pos-pdf').style.display='block';
-      showEnvioFeedback('⚠️ PDF gerado mas erro ao sincronizar: '+erros.join(' | ')+'\nTente novamente mais tarde.',false);
-    }
-  }catch(e){
-    hideProgress();btn.textContent='📋 Finalizar e Sincronizar';btn.disabled=false;btn.style.background='#0E2750';
-    alert('Erro: '+e.message);
-  }
+// Gera o ID padronizado AC_[Concessao]_[Linha]_[Torre]_[YYYYMMDD]
+function formatInspId(rec){
+  const clean=s=>(s||'').replace(/\s+/g,'').replace(/[^a-zA-Z0-9-]/g,'');
+  const data=(rec.data||'').replace(/-/g,'').slice(0,8)||new Date().toISOString().slice(0,10).replace(/-/g,'');
+  return'AC_'+clean(rec.concessao)+'_'+clean(rec.linha)+'_'+clean(rec.torre)+'_'+data;
 }
 
-async function compartilharPDF(){
-  if(!window._pdfBase64){alert('Gere o PDF primeiro.');return;}
-  var nome=window._pdfName||'relatorio.pdf';
-  var resumo=montarResumoWA();
-  var bc=atob(window._pdfBase64),ba=new Uint8Array(bc.length);
-  for(var i=0;i<bc.length;i++)ba[i]=bc.charCodeAt(i);
-  var blob=new Blob([ba],{type:'application/pdf'});
-  var file=new File([blob],nome,{type:'application/pdf'});
-  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-    try{
-      await navigator.share({title:'PQI Climate — '+resumo,files:[file]});
-      showEnvioFeedback('✅ Compartilhado!',true);
-      return;
-    }catch(e){
-      if(e.name==='AbortError')return; // user cancelled — silent
-    }
-  }
-  // Desktop fallback: just download
-  var a=document.createElement('a');
-  a.href='data:application/pdf;base64,'+window._pdfBase64;
-  a.download=nome;document.body.appendChild(a);a.click();document.body.removeChild(a);
-  showEnvioFeedback('PDF baixado — compartilhe manualmente pelo seu app.',true);
-}
-
-// ── SECUNDÁRIO: E-mail ────────────────────────────────────────
-async function abrirEmail(){
-  var btn=document.getElementById('btn-email');
-  if(!window._pdfBase64){alert('Gere o PDF primeiro.');return;}
-  var nome=window._pdfName||'relatorio.pdf';
-  btn.disabled=true;
-    var torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao'),linha=v('linha'),fornec=v('contratada');
-    var emailInsp=document.getElementById('email_inspetor').value||'';
-    var emailCC=document.getElementById('email_cc')?document.getElementById('email_cc').value:'';
-    var score=calcScore(),rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
-    var ccList=[];
-    if(emailInsp)ccList.push(emailInsp.trim());
-    if(emailCC)emailCC.split(';').forEach(function(e){var t=e.trim();if(t)ccList.push(t);});
-    var subj=encodeURIComponent('PQI Climate_'+torre+'_'+data+'_'+conc+'_'+linha+'_'+fornec+' - '+pctG+'% '+rl);
-    var nota='[ANEXAR O PDF: '+nome+' - salvo em Downloads]\n\n';
-    var corpo=nota+montarCorpoTexto();
-    var mailto='mailto:'+encodeURIComponent(EMAIL_FIXO);
-    if(ccList.length>0)mailto+='?cc='+encodeURIComponent(ccList.join(';'))+'&subject='+subj+'&body='+encodeURIComponent(corpo);
-    else mailto+='?subject='+subj+'&body='+encodeURIComponent(corpo);
-    showEnvioFeedback('✅ PDF salvo! Não esqueça de anexar "'+nome+'" antes de enviar o e-mail.',true);
-    window.location.href=mailto;
-}
-
-function concluirInspecao(){goTo('home');}
-
-// ── GERAR INSPECTION ID LEGÍVEL ───────────────────────────────
-function gerarInspectionID(){
-  var torre=(document.getElementById('id_torre').value||'X').replace(/[^a-zA-Z0-9]/g,'-').toUpperCase();
-  var concessao=(document.getElementById('concessao').value||'X').replace(/[^a-zA-Z0-9]/g,'');
-  var linha=(document.getElementById('linha').value||'X').replace(/[^a-zA-Z0-9]/g,'');
-  var data=(document.getElementById('data_inspecao').value||new Date().toISOString().split('T')[0]).replace(/-/g,'');
-  return 'PQI_'+concessao+'_'+linha+'_'+torre+'_'+data;
-}
-
-// ── MONTAR PAYLOAD LISTA 1 ────────────────────────────────────
-function montarPayloadInspecao(score, inspID){
-  var torre=document.getElementById('id_torre').value||'';
-  var data=document.getElementById('data_inspecao').value||'';
-  var qtdSim=0,qtdNao=0,qtdNA=0;
-  Object.keys(ITENS).forEach(function(sk){ITENS[sk].forEach(function(item){var e=estado[item.id]||{};if(e.res==='sim')qtdSim++;else if(e.res==='nao')qtdNao++;else if(e.res==='na')qtdNA++;});});
-  var qtdAchados=score.criticos.length;
-  var qtdAcoes=score.criticos.filter(function(c){return c.est.resolv==='nao';}).length;
-  return {
-    token:'hrz2026pqi',
-    id:inspID,
-    title:(document.getElementById('concessao').value||'')+'_'+(document.getElementById('linha').value||'')+'_'+torre+'_'+data,
-    torre:torre,
-    circuito:document.getElementById('circuito').value||'',
-    concessao:document.getElementById('concessao').value||'',
-    linha:document.getElementById('linha').value||'',
-    data_inspecao:data,
-    hora_inicio:document.getElementById('hora_inicio').value||'',
-    hora_fim:document.getElementById('hora_fim')?document.getElementById('hora_fim').value||'':'',
-    contratada:document.getElementById('contratada').value||'',
-    inspetor1:document.getElementById('inspetor1').value||'',
-    email_inspetor:document.getElementById('email_inspetor').value||'',
-    inspetor2:document.getElementById('inspetor2').value||'',
-    supervisor:document.getElementById('supervisor').value||'',
-    tipo_torre:document.getElementById('tipo_torre').value||'',
-    gps_lat:parseFloat(document.getElementById('gps_lat').value)||0,
-    gps_lng:parseFloat(document.getElementById('gps_lon').value)||0,
-    meteo:document.getElementById('meteo').value||'',
-    temperatura:parseFloat(document.getElementById('temperatura').value)||0,
-    bioma:document.getElementById('bioma_select')?document.getElementById('bioma_select').value||'':'',
-    vegetacao:document.getElementById('vegetacao_livre')?document.getElementById('vegetacao_livre').value||'':'',
-    obs_gerais:document.getElementById('obs_gerais')?document.getElementById('obs_gerais').value||'':'',
-    assina_nome:document.getElementById('assina_nome')?document.getElementById('assina_nome').value||'':'',
-    indice_geral:Math.round(score.pctGeral*100),
-    classificacao:riskLabel(score.pctGeral),
-    m1:Math.round((score.pcts['M1']||0)*100),
-    m2:Math.round((score.pcts['M2']||0)*100),
-    m3:Math.round((score.pcts['M3']||0)*100),
-    m4:Math.round((score.pcts['M4']||0)*100),
-    m5:Math.round((score.pcts['M5']||0)*100),
-    qtd_perguntas:qtdSim+qtdNao+qtdNA,
-    qtd_sim:qtdSim,
-    qtd_nao:qtdNao,
-    qtd_na:qtdNA,
-    qtd_achados:qtdAchados,
-    qtd_acoes:qtdAcoes,
-    tem_achado:qtdAchados>0?'Sim':'Não',
-    tem_acao:qtdAcoes>0?'Sim':'Não',
-    versao_app:'V11'
+// Monta o payload para PQI_Identification a partir de um rec (histórico)
+function buildIdentificationPayload(rec){
+  const ts=new Date().toISOString();
+  const dataISO=rec.data&&rec.data!=='—'?rec.data+'T00:00:00Z':ts;
+  const fid=formatInspId(rec);
+  return{
+    token:'',
+    id:fid,
+    title:fid,
+    torre:rec.torre,
+    circuito:rec.circuito||'',
+    concessao:rec.concessao,
+    linha:rec.linha,
+    data_inspecao:dataISO,
+    hora_inicio:rec.hora_inicio||'',
+    hora_fim:rec.hora_fim||'',
+    contratada:rec.contratada||'',
+    inspetor:rec.insp1||'',    // nome que o fluxo lê
+    inspetor1:rec.insp1||'',  // nome no schema do trigger
+    email_inspetor:rec.email_inspetor||'',
+    inspetor2:rec.insp2||'',
+    supervisor:rec.supervisor||'',
+    tipo_torre:rec.tipo||'',
+    gps_lat:parseFloat(rec.lat)||null,
+    gps_lng:parseFloat(rec.lon)||null,
+    meteo:rec.meteo||'',
+    temperatura:parseFloat(rec.temp)||null,
+    bioma:rec.bioma||'',
+    vegetacao:rec.vegetacao||'',
+    observacoes:rec.obs_gerais||'',  // campo que o fluxo lê
+    obs_gerais:rec.obs_gerais||'',
+    assina_nome:rec.assina_nome||rec.insp1||'',
+    indice_geral:rec.indice||0,
+    classificacao:rec.classificacao||'',
+    m1:rec.m1||0,m2:rec.m2||0,m3:rec.m3||0,m4:rec.m4||0,m5:rec.m5||0,
+    anomalias_count:rec.qtd_total||0,  // campo que o fluxo mapeia para QtdPerguntas
+    qtd_perguntas:rec.qtd_total||0,
+    qtd_sim:rec.qtd_sim||0,
+    qtd_nao:rec.qtd_nao||0,
+    qtd_na:rec.qtd_na||0,
+    qtd_achados:rec.qtd_achados||0,
+    qtd_acoes:rec.qtd_acoes||0,
+    tem_achado:rec.tem_achado||'Não',
+    tem_acao:rec.tem_acao||'Não',
+    versao_app:'ATLAS-PWA-1.0',
+    timestamp:ts
   };
 }
 
-// ── MONTAR PAYLOAD LISTA 2 (RESPOSTAS CHECKLIST) ──────────────
-function montarPayloadChecklist(score, inspID){
-  var torre=document.getElementById('id_torre').value||'';
-  var concessao=document.getElementById('concessao').value||'';
-  var data=document.getElementById('data_inspecao').value||'';
-  var inspetor=document.getElementById('inspetor1').value||'';
-  var contratada=document.getElementById('contratada').value||'';
-  var secNames={s1:'Via de Acesso',s2:'Praça e Base da Torre',s3:'Aterramento e Drenagem',s4:'Estrutura e Cabos',s5:'Descargas Elétricas',s6:'Incêndio e Calor',s7:'Histórico e Manutenção'};
-  var rows=[];
-  var ordem=0;
-  Object.keys(ITENS).forEach(function(sk){
-    ITENS[sk].forEach(function(item){
-      var est=estado[item.id]||{};
-      if(!est.res)return;
+// Monta o array rows[] para PQI_Answers_Fail
+// estadoSnap = objeto {itemId: {res, nota, obs, resolv, plano}}
+// allPhotos = array de registros de foto do IndexedDB para esta inspeção
+function buildRows(rec, estadoSnap, allPhotos){
+  const rows=[];
+  let ordem=0;
+  Object.entries(ITENS).forEach(([sk,items])=>{
+    const secName=SEC_NOMES[sk]||sk;
+    items.forEach(item=>{
       ordem++;
-      var pl=est.plano||{};
-      var ehAchado=est.res==='sim'?'Sim':'Não';
-      var gerou=est.resolv==='nao'&&pl.acao?'Sim':'Não';
-      var prazoFora=pl.prazoData&&checkPrazoFora(pl.prazoData,item.risco)?'Sim':'Não';
+      const est=estadoSnap[item.id]||{};
+      const resRaw=est.res||'';
+      const resposta=resRaw==='sim'?'Sim':resRaw==='nao'?'Não':resRaw==='na'?'N/A':'Não respondido';
+      const ehAchado=(resRaw==='sim'&&est.nota)?'Sim':'Não';
+      const criticidade=est.nota?notaLabel(est.nota):'';
+      const gerouAcao=(resRaw==='sim'&&est.resolv==='nao')?'Sim':'Não';
+      // Fotos deste item
+      const itemPhotos=allPhotos.filter(p=>p.itemId===item.id&&p.dataUrl&&p.dataUrl!=='loading');
+      const fotosEvidencia=itemPhotos.map(p=>p.dataUrl.includes(',')?p.dataUrl.split(',')[1]:p.dataUrl);
+      const fid=formatInspId(rec);
       rows.push({
-        token:'hrz2026pqi',
-        title:inspID+' | '+item.id,
-        inspection_id:inspID,
-        torre:torre,
-        concessao:concessao,
-        data_inspecao:data,
-        inspetor1:inspetor,
-        contratada:contratada,
+        title:fid+' | '+item.id,
+        inspection_id:fid,
+        torre:rec.torre,
+        concessao:rec.concessao,
+        data_inspecao:rec.data&&rec.data!=='—'?rec.data+'T00:00:00Z':new Date().toISOString(),
+        inspetor1:rec.insp1||'',
+        contratada:rec.contratada||'',
         modulo:item.mod,
         modulo_nome:MOD_NAMES[item.mod]||item.mod,
-        ordem:ordem,
+        ordem,
         codigo:item.id,
         pergunta:item.q,
         risco_base:item.risco,
         peso:item.peso,
-        secao:secNames[sk]||sk,
-        resposta:est.res==='sim'?'Sim':est.res==='nao'?'Não':'N/A',
+        secao:secName,
+        resposta,
         eh_achado:ehAchado,
-        criticidade:est.nota?notaLabel(est.nota):'',
+        criticidade,
         observacao:est.obs||'',
-        tem_foto:est.fotos&&est.fotos.some(function(f){return f;})?'Sim':'Não',
-        resolvido_campo:est.resolv==='sim'?'Sim':est.resolv==='nao'?'Não':'',
-        acao_imediata:est.acaoImediata||'',
-        gerou_acao:gerou,
-        acao_proposta:pl.acao||'',
-        responsavel_org:pl.respOrg||'',
-        responsavel_nome:pl.respNome||'',
-        email_responsavel:pl.email||'',
-        prazo:pl.prazoData||'',
-        prazo_maximo:prazoMax(item.risco),
-        fora_do_prazo:prazoFora,
-        status_acao:gerou==='Sim'?'Aberto':'',
-        fotos_evidencia:(est.fotos||[]).filter(function(f){return f;}).map(function(f){return f.split(',')[1]||'';}),
-        fotos_depois:(est.fotosDepois||[]).filter(function(f){return f;}).map(function(f){return f.split(',')[1]||'';})
+        tem_foto:fotosEvidencia.length>0?'Sim':'Não',
+        resolvido_campo:est.resolv==='sim'?'Sim':'Não',
+        acao_imediata:'',
+        gerou_acao:gerouAcao,
+        acao_proposta:(est.plano&&est.plano.contexto)||'',
+        responsavel_org:'',
+        responsavel_nome:'',
+        email_responsavel:'',
+        prazo:'',
+        prazo_maximo:prazoMaxDate(item.risco),
+        fora_do_prazo:'Não',
+        status_acao:gerouAcao==='Sim'?'Pendente':'',
+        fotos_evidencia:fotosEvidencia
       });
     });
   });
   return rows;
 }
 
-async function sincronizarHist(id){
-  var rec=getHistory().find(function(r){return r.id===id;});
-  if(!rec)return;
-  if(!navigator.onLine){alert('Sem conexão. Tente novamente quando tiver sinal.');return;}
-  var score={pctGeral:rec.indice/100,pcts:{M1:0,M2:0,M3:0,M4:0,M5:0},criticos:[],totais:{},maxEfetivo:{}};
-  var payload={
-    token:'hrz2026pqi',
-    id:rec.id,
-    title:(rec.concessao||'')+'_'+(rec.linha||'')+'_'+rec.torre+'_'+rec.data,
-    torre:rec.torre,
-    concessao:rec.concessao||'',
-    linha:rec.linha||'',
-    data_inspecao:rec.data,
-    inspetor1:rec.insp1||'',
-    indice_geral:rec.indice,
-    classificacao:rec.classificacao||'',
-    versao_app:'V11'
-  };
-  try{
-    var r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(r.ok||r.status===202){
-      markSent(id);
-      renderDashboard();
-    }else{
-      alert('Erro ao sincronizar: status '+r.status);
+// Envia as 3 chamadas para um registro
+async function sendToSharePoint(rec, estadoSnap, allPhotos){
+  const headers={'Content-Type':'application/json'};
+  const fid=formatInspId(rec);
+
+  // Chamada 1 — PQI_Identification (cabeçalho da inspeção)
+  const idPayload=buildIdentificationPayload(rec);
+  const r1=await fetch(WEBHOOK_IDENTIFICATION,{method:'POST',headers,body:JSON.stringify(idPayload)});
+  if(!r1.ok&&r1.status!==202)throw new Error('PQI_Identification retornou '+r1.status);
+
+  // Chamada 2 — PQI_Answers_Fail (respostas + fotos por item)
+  const rows=buildRows(rec,estadoSnap,allPhotos);
+  const ansPayload={token:'',inspection_id:fid,rows};
+  const r2=await fetch(WEBHOOK_ANSWERS,{method:'POST',headers,body:JSON.stringify(ansPayload)});
+  if(!r2.ok&&r2.status!==202)throw new Error('PQI_Answers_Fail retornou '+r2.status);
+
+  // Chamada 3 — PQI_PDF (PDF do relatório → PQI_FOTOS)
+  if(WEBHOOK_PDF&&rec.pdfBase64){
+    const pdfNome=fid+'.pdf';
+    const pdfPayload={token:'',inspection_id:fid,torre:rec.torre,concessao:rec.concessao,linha:rec.linha,data_inspecao:rec.data||'',inspetor:rec.insp1||'',contratada:rec.contratada||'',indice_geral:rec.indice||0,classificacao:rec.classificacao||'',m1:rec.m1||0,m2:rec.m2||0,m3:rec.m3||0,m4:rec.m4||0,m5:rec.m5||0,pdf_base64:rec.pdfBase64,pdf_nome:pdfNome};
+    const r3=await fetch(WEBHOOK_PDF,{method:'POST',headers,body:JSON.stringify(pdfPayload)});
+    if(!r3.ok&&r3.status!==202)console.warn('PQI_PDF retornou '+r3.status+' — PDF não salvo no SharePoint');
+  }
+
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SYNC COM SHAREPOINT — Power Automate
+// ══════════════════════════════════════════════════════════════
+async function sincronizarSharePoint(){
+  if(!window._pdfBase64){showEnvioFeedback('⚠ Gere o PDF primeiro.',false);return;}
+  if(!navigator.onLine){
+    showEnvioFeedback('📡 Sem conexão. A inspeção ficará salva e será sincronizada automaticamente quando você tiver sinal.',false);
+    if('serviceWorker' in navigator&&'SyncManager' in window){
+      const sw=await navigator.serviceWorker.ready;
+      sw.sync.register('atlas-sync-pending').catch(()=>{});
     }
+    return;
+  }
+  if(!WEBHOOK_IDENTIFICATION||!WEBHOOK_ANSWERS){
+    showEnvioFeedback('⚠ URLs dos fluxos Power Automate não configuradas. Consulte o guia ATLAS_PowerAutomate_Guia.docx.',false);
+    return;
+  }
+  showProgress('Sincronizando com SharePoint...');
+  try{
+    setProgress(20,'Salvando inspeção...');
+    const rec=await saveInspection();
+
+    setProgress(40,'Carregando fotos...');
+    const allPhotos=await dbGetByIndex('photos','inspId',_currentInspId);
+
+    setProgress(60,'Enviando identificação...');
+    await sendToSharePoint(rec,rec.estadoLite||{},allPhotos);
+
+    setProgress(90,'Finalizando...');
+    await new Promise(r=>setTimeout(r,300));
+    hideProgress();
+
+    await markSent(_currentInspId);
+    showEnvioFeedback('✅ Sincronizado com SharePoint! Disponível em PQI_GeneralList e PQI_Spec.',true);
+    renderDashboard();
   }catch(e){
-    alert('Erro ao sincronizar: '+e.message);
+    hideProgress();
+    showEnvioFeedback('⚠ Erro ao sincronizar ('+e.message+'). Inspeção salva localmente — tente novamente quando tiver sinal.',false);
   }
 }
 
-// Init
-goTo('home');
+// Sync de todas as pendentes (chamado pelo sync automático)
+async function syncAllPending(){
+  if(!navigator.onLine)return;
+  if(!WEBHOOK_IDENTIFICATION||!WEBHOOK_ANSWERS)return;
+  const hist=await getHistory();
+  const pendentes=hist.filter(r=>r.status==='pendente');
+  if(!pendentes.length)return;
+  showSyncBanner('syncing','Sincronizando '+pendentes.length+' inspeção(ões) pendente(s)...');
+  let ok=0;
+  for(const rec of pendentes){
+    try{
+      const allPhotos=await dbGetByIndex('photos','inspId',rec.id);
+      await sendToSharePoint(rec,rec.estadoLite||{},allPhotos);
+      await markSent(rec.id);
+      ok++;
+    }catch(e){console.warn('Sync falhou para',rec.id,e.message);}
+  }
+  if(ok>0){
+    showSyncBanner('success',ok+' inspeção(ões) sincronizada(s) ✓');
+    await renderDashboard();
+    setTimeout(hideSyncBanner,4000);
+  }else{hideSyncBanner();}
+}
+
+async function syncOne(id){
+  const rec=await dbGet('inspections',id);
+  if(!rec){alert('Inspeção não encontrada.');return;}
+  if(!navigator.onLine){alert('Sem conexão. Tente quando tiver sinal.');return;}
+  if(!WEBHOOK_IDENTIFICATION||!WEBHOOK_ANSWERS){alert('URLs dos fluxos não configuradas. Consulte o guia de configuração.');return;}
+  showProgress('Sincronizando...');
+  try{
+    const allPhotos=await dbGetByIndex('photos','inspId',id);
+    await sendToSharePoint(rec,rec.estadoLite||{},allPhotos);
+    hideProgress();
+    await markSent(id);
+    await renderDashboard();
+    showToast('Sincronizado! ✓');
+  }catch(e){hideProgress();alert('Erro ao sincronizar: '+e.message);}
+}
+
+async function triggerManualSync(){
+  await syncAllPending();
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMPARTILHAR
+// ══════════════════════════════════════════════════════════════
+function compartilharPDF(){
+  if(!window._pdfBase64){showEnvioFeedback('⚠ Gere o PDF primeiro.',false);return;}
+  const score=calcScore();
+  const torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao'),linha=v('linha'),insp1=v('inspetor1');
+  const bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+  const rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
+  let msg=`🏗️ *ATLAS — HRZ Transmissoras*\n─────────────────────────────\n📍 *Torre:* ${torre}\n🔌 *Concessão:* ${conc} · ${linha}\n📅 *Data:* ${data}\n👷 *Inspetor:* ${insp1}\n`;
+  if(bioma)msg+=`🌿 *Bioma:* ${bioma}\n`;
+  msg+=`─────────────────────────────\n📊 *ÍNDICE GERAL: ${pctG}% — ${rl}*\n\n*Módulos:*\n`;
+  Object.keys(MAX_MOD).forEach(mod=>{const p=Math.round((score.pcts[mod]||0)*100),r=riskLabel(score.pcts[mod]||0);const bar='█'.repeat(Math.round(p/10))+'░'.repeat(10-Math.round(p/10));msg+=MOD_NAMES[mod].split('—')[0].trim()+' '+bar+' '+p+'% '+r+'\n';});
+  if(score.criticos.length>0)msg+=`\n⚠️ *${score.criticos.length} anomalia(s) registrada(s)*\n`;
+  msg+=`─────────────────────────────\n📎 *PDF gerado — ATLAS · HRZ*`;
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+  markSent(_currentInspId).then(()=>{renderDashboard();});
+}
+
+function abrirEmail(){
+  const torre=v('id_torre'),data=v('data_inspecao'),conc=v('concessao');
+  const score=calcScore(),rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
+  const cc=document.getElementById('email_cc').value.trim();
+  const subj=encodeURIComponent(`ATLAS_${conc}_${torre}_${data} — ${pctG}% ${rl}`);
+  const body=encodeURIComponent(`[ANEXAR O PDF: ${window._pdfName||'arquivo PDF da inspeção'}]\n\nATLAS — HRZ Transmissoras\nTorre: ${torre}\nData: ${data}\nÍndice: ${pctG}% — ${rl}\n\nPDF gerado pelo ATLAS · HRZ Transmissoras`);
+  const mailto=`mailto:${EMAIL_FIXO}${cc?';'+cc.replace(/;/g,';'):''}?subject=${subj}&body=${body}`;
+  window.location.href=mailto;
+}
+
+async function verRelatorio(id){
+  const rec=await dbGet('inspections',id);
+  if(!rec)return;
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><meta charset="UTF-8"><title>ATLAS — Torre ${rec.torre}</title><style>body{font-family:sans-serif;padding:20px;max-width:700px;margin:0 auto;font-size:13px;line-height:1.6;}</style></head><body><h2>ATLAS · HRZ — Torre ${rec.torre}</h2><p><b>Data:</b> ${rec.data} · <b>Inspetor:</b> ${rec.insp1}</p><p><b>Índice:</b> ${rec.indice}% — ${rec.classificacao}</p><hr><p>Para ver o relatório completo, gere novamente a inspeção.</p></body></html>`);
+  w.document.close();
+}
+
+async function baixarPDFhist(id){
+  if(window._pdfBase64&&window._currentInspId===id){
+    const a=document.createElement('a');
+    a.href='data:application/pdf;base64,'+window._pdfBase64;
+    a.download=window._pdfName||'relatorio.pdf';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }else{
+    const rec=await dbGet('inspections',id);
+    if(rec&&rec.pdfBase64){
+      const a=document.createElement('a');
+      a.href='data:application/pdf;base64,'+rec.pdfBase64;
+      a.download=rec.pdfName||`ATLAS_${rec.torre}_${rec.data}.pdf`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+    }else{
+      alert('PDF não disponível para esta inspeção. Abra a inspeção e gere novamente.');
+    }
+  }
+}
+
+async function resendWA(id){
+  const rec=await dbGet('inspections',id);
+  if(!rec)return;
+  const msg=`🏗️ *ATLAS — HRZ*\n📍 Torre: ${rec.torre}\n📅 ${rec.data} · ${rec.insp1}\n📊 *${rec.indice}% — ${rec.classificacao}*\n_ATLAS · HRZ Transmissoras_`;
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+  await markSent(id);renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SYNC BANNER + TOAST
+// ══════════════════════════════════════════════════════════════
+function showSyncBanner(type,msg){
+  const banner=document.getElementById('sync-banner');
+  const dot=document.getElementById('sync-dot');
+  const msgEl=document.getElementById('sync-msg');
+  const manualBtn=document.getElementById('sync-manual-btn');
+  banner.className='sync-banner show '+type;
+  msgEl.textContent=msg;
+  dot.className='sync-dot'+(type==='syncing'?' pulse':'');
+  manualBtn.style.display=type==='syncing'?'none':'block';
+}
+function hideSyncBanner(){document.getElementById('sync-banner').classList.remove('show');}
+
+function showToast(msg){
+  let t=document.getElementById('atlas-toast');
+  if(!t){t=document.createElement('div');t.id='atlas-toast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0A1F44;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s;white-space:nowrap;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ONLINE/OFFLINE DETECTION
+// ══════════════════════════════════════════════════════════════
+async function onConnectionRestored(){
+  // Verifica se há inspeções pendentes
+  const hist=await getHistory();
+  const pendentes=hist.filter(r=>r.status==='pendente');
+  if(pendentes.length>0){
+    showSyncBanner('pending',`${pendentes.length} inspeção(ões) aguardando sync`);
+    // Tenta sincronizar automaticamente
+    setTimeout(syncAllPending,2000);
+  }
+}
+
+window.addEventListener('online',()=>{
+  showToast('📡 Conexão restaurada!');
+  onConnectionRestored();
+});
+
+window.addEventListener('offline',()=>{
+  showToast('📴 Modo offline — dados salvos localmente');
+});
+
+// Listener para mensagens do Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',event=>{
+    if(event.data&&event.data.type==='BACKGROUND_SYNC_TRIGGERED'){
+      syncAllPending();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// PWA — INSTALL PROMPT
+// ══════════════════════════════════════════════════════════════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  // Mostra botão de instalação na home
+  showInstallButton();
+});
+
+function showInstallButton(){
+  const hero=document.getElementById('home-install-btn');
+  if(hero){hero.style.display='flex';}
+}
+
+// ══════════════════════════════════════════════════════════════
+// MONTAGEM DA MENSAGEM DE TEXTO
+// ══════════════════════════════════════════════════════════════
+function montarCorpoTexto(){
+  const NL='\n',score=calcScore();
+  const torre=v('id_torre'),tipo=v('tipo_torre'),circ=v('circuito'),conc=v('concessao'),linha=v('linha');
+  const data=v('data_inspecao'),hIni=v('hora_inicio'),hFim=v('hora_fim');
+  const insp1=v('inspetor1'),insp2=v('inspetor2'),superv=v('supervisor'),fornec=v('contratada');
+  const lat=v('gps_lat'),lon=v('gps_lon'),meteo=v('meteo'),temp=v('temperatura'),obsG=v('obs_gerais');
+  const bioma=document.getElementById('bioma_select')?document.getElementById('bioma_select').value:'';
+  const rl=riskLabel(score.pctGeral),pctG=Math.round(score.pctGeral*100);
+  let b='ATLAS — HRZ TRANSMISSORAS'+NL+'================================='+NL;
+  b+=`Torre: ${torre}${tipo&&tipo!=='—'?' ('+tipo+')':''}${NL}`;
+  b+=`Concessao: ${conc} | Linha: ${linha} | Circuito: ${circ}${NL}`;
+  b+=`Data: ${data}${hIni&&hIni!=='—'?' | Inicio: '+hIni:''}${hFim&&hFim!=='—'?' | Termino: '+hFim:''}${NL}`;
+  b+=`Inspetor: ${insp1}${insp2&&insp2!=='—'?' / '+insp2:''}${NL}`;
+  b+=`Supervisor: ${superv}${NL}Fornecedor: ${fornec}${NL}`;
+  if(bioma)b+=`Bioma: ${bioma}${NL}`;
+  b+=`${NL}==================================${NL}INDICE GERAL: ${pctG}% - ${rl}${NL}==================================${NL}${NL}MODULOS:${NL}`;
+  Object.keys(MAX_MOD).forEach(mod=>{const pts=score.totais[mod]||0,mx=score.maxEfetivo[mod]||0;b+=`${MOD_NAMES[mod].split('—')[0].trim()}: ${Math.round((score.pcts[mod]||0)*100)}% - ${riskLabel(score.pcts[mod]||0)} (${pts}/${mx} pts)${NL}`;});
+  return b;
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',async()=>{
+  // Registra Service Worker
+  if('serviceWorker' in navigator){
+    try{
+      await navigator.serviceWorker.register('./sw.js');
+      console.log('ATLAS SW registrado');
+    }catch(e){console.warn('SW falhou:',e);}
+  }
+
+  // Inicializa DB
+  await openDB();
+
+  // Renderiza home
+  renderHeroProfile();
+  await renderDashboard();
+
+  // Verifica se há pendentes ao abrir
+  if(navigator.onLine){
+    const hist=await getHistory();
+    const pendentes=hist.filter(r=>r.status==='pendente');
+    if(pendentes.length>0){
+      showSyncBanner('pending',`${pendentes.length} inspeção(ões) aguardando sync`);
+    }
+  }
+
+  // Action da URL (?action=nova)
+  if(window.location.search.includes('action=nova')){
+    iniciarNovaInspecao();
+  }
+});
+
 </script>
-</body></html>
+</body>
+</html>
