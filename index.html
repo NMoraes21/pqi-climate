@@ -1104,14 +1104,14 @@ function calcularEIr(n){
     return;
   }
   // Validação: itens com resposta "Não" precisam de pelo menos uma foto de evidência
-  const naoSemFoto=allItens.filter(it=>{
-    if(!estado[it.id]||estado[it.id].res!=='nao')return false;
+  const simSemFoto=allItens.filter(it=>{
+    if(!estado[it.id]||estado[it.id].res!=='sim')return false;
     const fotos=estado[it.id].fotos||[];
     return !fotos.some(f=>f&&f!=='loading');
   });
-  if(naoSemFoto.length>0){
-    const nomes=naoSemFoto.map(it=>it.label||it.id).join('\n• ');
-    alert(`⚠ Os itens abaixo têm resposta "Não" mas não têm foto de evidência:\n• ${nomes}\n\nAnexe pelo menos uma foto para cada item antes de continuar.`);
+  if(simSemFoto.length>0){
+    const nomes=simSemFoto.map(it=>it.label||it.id).join('\n• ');
+    alert(`⚠ Os itens abaixo têm resposta "Sim" mas não têm foto de evidência:\n• ${nomes}\n\nAnexe pelo menos uma foto para cada item antes de continuar.`);
     return;
   }
   const score=calcScore();
