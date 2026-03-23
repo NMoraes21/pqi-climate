@@ -1103,17 +1103,7 @@ function calcularEIr(n){
     alert(`⚠ ${semResposta.length} ${semResposta.length===1?'item do checklist ainda não tem resposta':'itens do checklist ainda não têm resposta'}. Preencha todos os itens antes de ver o resultado.`);
     return;
   }
-  // Validação: itens com resposta "Não" precisam de pelo menos uma foto de evidência
-  const simSemFoto=allItens.filter(it=>{
-    if(!estado[it.id]||estado[it.id].res!=='sim')return false;
-    const fotos=estado[it.id].fotos||[];
-    return !fotos.some(f=>f&&f!=='loading');
-  });
-  if(simSemFoto.length>0){
-    const nomes=simSemFoto.map(it=>it.label||it.id).join('\n• ');
-    alert(`⚠ Os itens abaixo têm resposta "Sim" mas não têm foto de evidência:\n• ${nomes}\n\nAnexe pelo menos uma foto para cada item antes de continuar.`);
-    return;
-  }
+  // Foto é opcional — aparece apenas para itens com resposta "Sim", mas não é obrigatória.
   const score=calcScore();
   const torre=v('id_torre'),tipo=v('tipo_torre'),circ=v('circuito'),conc=v('concessao'),linha=v('linha');
   const data=v('data_inspecao'),hIni=v('hora_inicio'),hFim=v('hora_fim');
