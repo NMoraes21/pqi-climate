@@ -536,7 +536,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
           ☁️ Sincronizar com SharePoint
         </button>
       </div>
-      <button class="btn-primary" id="btn-compartilhar" onclick="compartilharPDF()" style="background:#25D366;font-size:15px;padding:13px;">📤 Compartilhar (WhatsApp)</button>
+      <button class="btn-primary" id="btn-compartilhar" onclick="compartilharPDF()" style="display:none;"></button>
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
         <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Backup por e-mail</div>
         <div class="field" style="margin-bottom:8px;"><label>E-mails extras (opcional) — separe por ;</label><input type="text" id="email_cc" placeholder="fulano@empresa.com; ciclano@empresa.com"></div>
@@ -1323,7 +1323,7 @@ async function gerarPDFBase(){
     document.getElementById('btn-gerar-pdf').style.background='var(--green)';
     document.getElementById('btn-gerar-pdf').disabled=true;
     document.getElementById('acoes-pos-pdf').style.display='block';
-    showEnvioFeedback('✓ PDF gerado com sucesso! Escolha como deseja compartilhar.',true);
+    showEnvioFeedback('✓ PDF gerado com sucesso! Agora clique em "Sincronizar com SharePoint" para enviar os dados.',true);
   }catch(e){
     hideProgress();
     console.error(e);
